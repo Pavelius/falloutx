@@ -1,0 +1,17 @@
+﻿Drop: Выбросить
+FireAimed: Стрелять прицельно
+FireBurst: Очередь
+FireContinuous: Очередь
+FireSingle: Стрелять
+KickLeg: Бить ногой
+Look: Осмотреть
+NoAction: Нет действия
+Reload: Перезарядка
+Swing: Удар с размаха
+Talk: Говорить
+Throw: Бросить
+ThrowPunch: Бить рукой
+Thrust: Тычек
+Turn: Развернуть
+Unload: Разрядить
+Use: ИСпользовать

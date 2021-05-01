@@ -1,0 +1,5 @@
+﻿WoundEye: Глаза. 
+WoundLeftHand: Левая рука. 
+WoundLeftLeg: Левая нога. 
+WoundRightHand: Правая рука. 
+WoundRightLeg: Правая нога. 

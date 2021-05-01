@@ -1,0 +1,2 @@
+﻿In localization file command.txt
+ Not found translation TradeInfo

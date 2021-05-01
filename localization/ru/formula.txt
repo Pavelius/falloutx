@@ -1,0 +1,3 @@
+﻿Experience: Опыт. 
+NextLevelExperience: Следующий уровень.
+-0 След.ур.

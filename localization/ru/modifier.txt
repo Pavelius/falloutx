@@ -1,0 +1,4 @@
+﻿Compare: Сравнить. 
+Minus: Минус.
+OneTime: Один раз. 
+Plus: Плюс. 

@@ -1,0 +1,10 @@
+﻿Average: Непл.
+Epic: Герой!
+Fair: Средне
+Fantastic: Круто
+Good: Xорошо
+Great: Высоко
+Mediocre: Низко
+Poor: Плохо
+Superb: Отлич.
+Terrible: Гадко

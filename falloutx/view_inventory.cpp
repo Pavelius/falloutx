@@ -8,6 +8,19 @@ static item*		hilite_item;
 static item*		item_info;
 static char			chat_information[1024];
 
+static void look_item() {
+	item_info = (item*)hot.object;
+}
+
+static void drop_item() {
+}
+
+static void use_item() {
+}
+
+static void unload_item() {
+}
+
 static void itemtext(int x, int y, int width, int height, const item& it) {
 	char temp[260]; stringbuilder sb(temp);
 	rect rc = {x, y, x + width, y + height};
@@ -64,54 +77,6 @@ static int gear(int x, int y, int sx, int sy, item& it) {
 	return rc.height();
 }
 
-static void backpack(int x, int y, int width, int height, creaturei& player) {
-	static int first;
-	rect rc = {x, y, x + width, y + height};
-	state push;
-	setcolor(ColorText);
-	setclip({rc.x1, rc.y1, rc.x1 + 120, rc.y2});
-	//draw::rectb(rc);
-	// Mouse input
-	auto a = ishilite(rc);
-	if(a) {
-		switch(hot.key) {
-		case MouseWheelDown: execute(setint, first + 1, 0, &first); break;
-		case MouseWheelUp: execute(setint, first - 1, 0, &first); break;
-		default: break;
-		}
-		hilite_item = &player.getitem(0);
-	}
-	const int element_height = 48;
-	auto count_per_page = height / element_height;
-	itema source;
-	player.getitems(source);
-	source.sort();
-	if(!source)
-		return;
-	// Correction
-	if(first + count_per_page >= (int)source.count)
-		first = source.count - count_per_page;
-	if(first < 0)
-		first = 0;
-	// Up button
-	if(first == 0)
-		image(x + 80, y - 4, INTRFACE, 53, ImageNoOffset);
-	else if(buttonf(x + 80, y - 4, 49, 50, KeyUp, false))
-		execute(setint, first - 1, 0, &first);
-	// Down button
-	if(first + count_per_page >= (int)source.count)
-		image(x + 80, y + 20, INTRFACE, 54, ImageNoOffset);
-	else if(buttonf(x + 80, y + 20, 51, 52, KeyDown, false))
-		execute(setint, first + 1, 0, &first);
-	// Show elements
-	for(auto i = first; i < (int)source.count; i++) {
-		if(y >= rc.y2)
-			break;
-		if(gear(x, y, width, element_height - 1, *source.data[i]))
-			y += element_height;
-	}
-}
-
 void itema::paint(const rect& rc, int& origin, int mode, point pts) {
 	// Correction
 	const int element_height = 50 * rc.width() / 70;
@@ -159,6 +124,7 @@ void itema::paint(const rect& rc, int& origin, int mode, point pts) {
 static void render_inventory(creaturei& player, bool info_mode) {
 	hilite_item = 0;
 	int x, y, sx, sy;
+	static int origin;
 	window(x, y, sx, sy, 48, -48);
 	if(ishilite({x, y, x + sx, y + sy})) {
 		if(info_mode)
@@ -174,15 +140,19 @@ static void render_inventory(creaturei& player, bool info_mode) {
 	gear(x + 152, y + 184, 92, 60, player.getarmor());
 	gear(x + 152, y + 287, 92, 60, player.getweapon(0));
 	gear(x + 245, y + 287, 92, 60, player.getweapon(1));
-	backpack(x + 42, y + 40, 70, 300, player);
+	itema source;
+	player.getitems(source);
+	source.sort();
+	source.paint({x + 42, y + 40, x + 42 + 70, y + 40 + 300}, origin, 1, {(short)(x + 42 + 80), (short)(y + 40 - 4)});
 	if(info_mode && hilite_item) {
-		//	addaction(Look, action_look);
-		//	addaction(Drop, action_drop);
-		//	if(di.hilite->isweapon() && di.hilite->getammocount())
-		//		addaction(Unload, action_drop);
+		addaction(Look, look_item, hilite_item, 0, item::getobjectname);
+		addaction(Drop, drop_item, hilite_item, 0);
+		if(hilite_item->isweapon() && hilite_item->getclipcount())
+			addaction(Unload, unload_item, hilite_item, 0);
 	}
 	if(buttonf(x + 432, y + 322, 299, 300, KeyEscape, false))
 		buttoncancel();
+	consoleview();
 }
 
 item* choose_drag_target(creaturei& player, screenshoot& screen, item& source) {
@@ -220,8 +190,8 @@ void creaturei::inventory() {
 				info_mode = 0;
 			else if(hot.pressed && hilite_item) {
 				if(info_mode) {
-					if(*hilite_item)
-						item_info = hilite_item;
+					//if(*hilite_item)
+					//	item_info = hilite_item;
 				} else {
 					auto source = hilite_item;
 					auto element = *hilite_item;

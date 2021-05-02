@@ -43,6 +43,12 @@
     <ClInclude Include="datetime.h">
       <Filter>Логика</Filter>
     </ClInclude>
+    <ClInclude Include="main_util.h">
+      <Filter>Утилиты</Filter>
+    </ClInclude>
+    <ClInclude Include="sprite_util.h">
+      <Filter>Утилиты</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Поддержка">
@@ -253,6 +259,21 @@
     </ClCompile>
     <ClCompile Include="modifier.cpp">
       <Filter>Логика</Filter>
+    </ClCompile>
+    <ClCompile Include="main_util.cpp">
+      <Filter>Утилиты</Filter>
+    </ClCompile>
+    <ClCompile Include="pro_item_en_util.cpp">
+      <Filter>Утилиты</Filter>
+    </ClCompile>
+    <ClCompile Include="pro_item_util.cpp">
+      <Filter>Утилиты</Filter>
+    </ClCompile>
+    <ClCompile Include="pro_misc_util.cpp">
+      <Filter>Утилиты</Filter>
+    </ClCompile>
+    <ClCompile Include="sprite_util.cpp">
+      <Filter>Утилиты</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

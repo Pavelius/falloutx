@@ -10,6 +10,8 @@ BSDATA(itemi) = {
 	{{"LeatherArmorMarkII"}, 10, 10, 1000, {250, 29}, Leather, {}, {20, HMLTHR, HFLTHR, {3, 1, 1, 1, 1, 0, 1}, {25, 20, 25, 10, 40, 0, 25}}, {}, Throwing, "00000379"},
 	{{"MetalArmor"}, 10, 35, 1100, {1, 33}, Metal, {}, {10, HMMETL, HFMETL, {4, 6, 4, 4, 0, 0, 4}, {30, 75, 10, 20, 0, 0, 25}}, {}, Throwing, "00000001"},
 	{{"MetalArmorMarkII"}, 10, 35, 1900, {248, 33}, Metal, {}, {15, HMMETL, HFMETL, {4, 7, 4, 4, 1, 0, 4}, {35, 80, 15, 25, 10, 0, 30}}, {}, Throwing, "00000380"},
+	{{"AdvancedPowerArmor"}, 15, 90, 20000, {227, 152}, Metal, {}, {30, HANPWR, HANPWR, {15, 19, 16, 15, 15, 0, 20}, {55, 90, 70, 60, 60, 0, 65}}, {}, Throwing, "00000348"},
+	{{"AdvPowerArmorMKII"}, 15, 100, 25000, {227, 152}, Metal, {}, {35, HANPWR, HANPWR, {18, 19, 16, 18, 15, 0, 20}, {60, 90, 70, 60, 65, 0, 70}}, {}, Throwing, "00000349"},
 	{{"Knife"}, 1, 1, 40, {96, 28, 1}, Metal, {1, 6, 2, Phisycal, 3, 1, NoItem, 0, 0, 1}, {}, {}, MeleeWeapon, "00000012"},
 	{{"Spear"}, 4, 4, 80, {13, 42, 4}, Wood, {3, 10, 4, Phisycal, 4, 2, NoItem, 0, 0, 1}, {}, {}, MeleeWeapon, "00000013"},
 	{{"X10mmPistol"}, 2, 3, 250, {4, 34, 5}, Metal, {5, 12, 3, Phisycal, 5, 25, X10mmAP, 12, 1, 2}, {}, {}, SmallGuns, "00000004"},
@@ -131,4 +133,8 @@ void item::addtext(stringbuilder& sb) const {
 	sb.addn(ei.txt.text);
 	if(ei.weapon.min_strenght)
 		sb.adds("Ìèí. ÑË: %1i", ei.weapon.min_strenght);
+}
+
+const char*	item::getobjectname(const void* object, stringbuilder& sb) {
+	return ((item*)object)->getname();
 }

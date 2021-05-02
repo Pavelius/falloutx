@@ -163,118 +163,113 @@ BSDATA(wallobj) = {
 	{{"BrickCorner"}, 497, {{0, 0}}},
 };
 
-extern walli walls_data[];
-const char* getlightflags(short unsigned v);
-const char* getmaterial(int v);
-
 static void test_walls() {
-	//static unsigned short hilite;
-	//static int show_index = 0;
-	//static point camera = {250, -150};
-	//auto show_center = false;
-	//openform();
-	//auto pd = bsdata<wallobj>::elements + 5;
-	//int index = 0;
-	//int index_wall = 200;
-	//while(ismodal()) {
-	//	if(index_wall >= (int)(sizeof(bsdata<wallobj>::elements) / sizeof(bsdata<wallobj>::elements[0])))
-	//		index_wall = sizeof(bsdata<wallobj>::elements) / sizeof(bsdata<wallobj>::elements[0]) - 1;
-	//	if(index_wall < 0)
-	//		index_wall = 0;
-	//	auto pd = bsdata<wallobj>::elements + index_wall;
-	//	if(index >= (int)pd->points.size())
-	//		index = pd->points.size() - 1;
-	//	if(index < 0)
-	//		index = 0;
-	//	rectf({0, 0, 640, 480}, colors::gray);
-	//	pd->paint({9, 13}, camera, show_center);
-	//	auto pm = h2m(hot.mouse + camera);
-	//	auto pt = m2h(pm.x, pm.y) - camera;
-	//	image(pt.x, pt.y, INTRFACE, 1);
-	//	char temp[1024]; stringbuilder sb(temp);
-	//	sb.addn("%1 count %2i, start %3i %4", pd->txt.id, pd->points.size(), pd->start, walls_data[pd->start - 1].original);
-	//	for(unsigned i = 0; i < pd->points.size(); i++) {
-	//		sb.add("\n");
-	//		if(i == index)
-	//			sb.add("[~");
-	//		auto pw = walls_data + (pd->start - 1 + i);
-	//		sb.add("%1i, %2i %3 %4", pd->points.begin()[i].x, pd->points.begin()[i].y, getlightflags(pw->flags), getmaterial(pw->material));
-	//		if(i == index)
-	//			sb.add("]");
-	//	}
-	//	auto pci = (point*)pd->points.begin() + index;
-	//	textf(4, 4, 640 / 2, temp);
-	//	domodal();
-	//	switch(hot.key) {
-	//	case 'G': show_center = !show_center; break;
-	//	case KeyUp: index--; break;
-	//	case KeyDown: index++; break;
-	//	case KeyLeft: index_wall--; break;
-	//	case KeyRight: index_wall++; break;
-	//	case 'W': pci->y--; break;
-	//	case 'S': pci->y++; break;
-	//	case 'Q': pci->x++; break;
-	//	case 'A': pci->x--; break;
-	//	}
-	//}
-	//closeform();
+	static unsigned short hilite;
+	static int show_index = 0;
+	static point camera = {250, -150};
+	auto show_center = false;
+	openform();
+	auto pd = bsdata<wallobj>::elements + 5;
+	int index = 0;
+	int index_wall = 200;
+	while(ismodal()) {
+		if(index_wall >= (int)(sizeof(bsdata<wallobj>::elements) / sizeof(bsdata<wallobj>::elements[0])))
+			index_wall = sizeof(bsdata<wallobj>::elements) / sizeof(bsdata<wallobj>::elements[0]) - 1;
+		if(index_wall < 0)
+			index_wall = 0;
+		auto pd = bsdata<wallobj>::elements + index_wall;
+		if(index >= (int)pd->points.size())
+			index = pd->points.size() - 1;
+		if(index < 0)
+			index = 0;
+		rectf({0, 0, 640, 480}, colors::gray);
+		pd->paint({9, 13}, camera, show_center);
+		auto pm = h2m(hot.mouse + camera);
+		auto pt = m2h(pm.x, pm.y) - camera;
+		image(pt.x, pt.y, INTRFACE, 1);
+		char temp[1024]; stringbuilder sb(temp);
+		sb.addn("%1 count %2i, start %3i", pd->txt.id, pd->points.size(), pd->start);
+		for(unsigned i = 0; i < pd->points.size(); i++) {
+			sb.add("\n");
+			if(i == index)
+				sb.add("[~");
+			sb.add("%1i, %2i", pd->points.begin()[i].x, pd->points.begin()[i].y);
+			if(i == index)
+				sb.add("]");
+		}
+		auto pci = (point*)pd->points.begin() + index;
+		textf(4, 4, 640 / 2, temp);
+		domodal();
+		switch(hot.key) {
+		case 'G': show_center = !show_center; break;
+		case KeyUp: index--; break;
+		case KeyDown: index++; break;
+		case KeyLeft: index_wall--; break;
+		case KeyRight: index_wall++; break;
+		case 'W': pci->y--; break;
+		case 'S': pci->y++; break;
+		case 'Q': pci->x++; break;
+		case 'A': pci->x--; break;
+		}
+	}
+	closeform();
 }
 
 static void test_tiles() {
-	//point camera = {0, 0};
-	//static unsigned short hilite;
-	//static int show_index = 0;
-	//openform();
-	//while(ismodal()) {
-	//	char temp[128]; stringbuilder sb(temp);
-	//	auto ps = gres(TILES);
-	//	if(!ps)
-	//		return;
-	//	auto tm = getuitime();
-	//	const auto count = ps->cicles;
-	//	const auto max_width = 16;
-	//	auto pt = s2m(hot.mouse + camera);
-	//	if(pt.x < 0 || pt.y<0 || pt.x > max_width)
-	//		hilite = 0;
-	//	else
-	//		hilite = pt.y * max_width + pt.x;
-	//	auto need_break = false;
-	//	rectf({0, 0, 640, 480}, colors::gray);
-	//	for(auto y = 0; true; y++) {
-	//		if(need_break)
-	//			break;
-	//		for(int x = 0; x < max_width; x++) {
-	//			unsigned tv = y * max_width + x;
-	//			if(!tv)
-	//				continue;
-	//			if(tv > count) {
-	//				need_break = true;
-	//				break;
-	//			}
-	//			point pt = m2s(x, y);
-	//			point pz = pt - camera;
-	//			image(pz.x - tile_width / 2, pz.y - tile_height / 2, ps, ps->ganim(tv, tm), 0);
-	//			if(show_index) {
-	//				sb.clear(); sb.add("%1i", tv);
-	//				text(pz.x - textw(temp) / 2, pz.y - texth() / 2, temp);
-	//			}
-	//			if(hilite == tv)
-	//				image(pz.x - tile_width / 2, pz.y - tile_height / 2, ps, ps->ganim(222, tm), 0);
-	//		}
-	//	}
-	//	const int dx = 16;
-	//	const int dy = 12;
-	//	switch(hot.key) {
-	//	case 'G': execute(setint, show_index ? 0 : 1, 0, &show_index); break;
-	//	case KeyLeft: execute(setshort, camera.x - dx, 0, &camera.x); break;
-	//	case KeyRight: execute(setshort, camera.x + dx, 0, &camera.x); break;
-	//	case KeyUp: execute(setshort, camera.y - dy, 0, &camera.y); break;
-	//	case KeyDown: execute(setshort, camera.y + dy, 0, &camera.y); break;
-	//	case KeyEscape: execute(buttoncancel); break;
-	//	}
-	//	domodal();
-	//}
-	//closeform();
+	point camera = {0, 0};
+	static unsigned short hilite;
+	static int show_index = 0;
+	openform();
+	while(ismodal()) {
+		char temp[128]; stringbuilder sb(temp);
+		auto ps = gres(TILES);
+		if(!ps)
+			return;
+		auto tm = getuitime();
+		const auto count = ps->cicles;
+		const auto max_width = 16;
+		auto pt = s2m(hot.mouse + camera);
+		if(pt.x < 0 || pt.y<0 || pt.x > max_width)
+			hilite = 0;
+		else
+			hilite = pt.y * max_width + pt.x;
+		auto need_break = false;
+		rectf({0, 0, 640, 480}, colors::gray);
+		for(auto y = 0; true; y++) {
+			if(need_break)
+				break;
+			for(int x = 0; x < max_width; x++) {
+				unsigned tv = y * max_width + x;
+				if(!tv)
+					continue;
+				if(tv > count) {
+					need_break = true;
+					break;
+				}
+				point pt = m2s(x, y);
+				point pz = pt - camera;
+				image(pz.x - tile_width / 2, pz.y - tile_height / 2, ps, ps->ganim(tv, tm), 0);
+				if(show_index) {
+					sb.clear(); sb.add("%1i", tv);
+					text(pz.x - textw(temp) / 2, pz.y - texth() / 2, temp);
+				}
+				if(hilite == tv)
+					image(pz.x - tile_width / 2, pz.y - tile_height / 2, ps, ps->ganim(222, tm), 0);
+			}
+		}
+		const int dx = 16;
+		const int dy = 12;
+		switch(hot.key) {
+		case 'G': execute(setint, show_index ? 0 : 1, 0, &show_index); break;
+		case KeyLeft: execute(setshort, camera.x - dx, 0, &camera.x); break;
+		case KeyRight: execute(setshort, camera.x + dx, 0, &camera.x); break;
+		case KeyUp: execute(setshort, camera.y - dy, 0, &camera.y); break;
+		case KeyDown: execute(setshort, camera.y + dy, 0, &camera.y); break;
+		case KeyEscape: execute(buttoncancel); break;
+		}
+		domodal();
+	}
+	closeform();
 }
 
 static void test_animate() {
@@ -360,6 +355,8 @@ static void test_game() {
 	player.add(MetalArmor, 1);
 	player.add(Cookie, 4);
 	player.add(X12GaShotgunShells, 10);
+	player.add(AdvancedPowerArmor, 1);
+	player.add(AdvPowerArmorMKII, 1);
 	player.setposition({1000, 100});
 	player.setdirection(2);
 	player.setanimate(AnimateStand, true);
@@ -373,10 +370,10 @@ static void test_game() {
 	opponent->add(Spear, 1);
 	opponent->add(X10mmPistol, 1);
 	opponent->add(X10mmSMG, 1);
-	player.chat(*opponent, "manors");
+	//player.chat(*opponent, "manors");
 	//player.trade(*opponent);
 	//game.getplayer().charsheet();
-	//setstage(game.introducing);
+	setstage(game.introducing);
 }
 
 void gamei::mainmenu() {
@@ -405,7 +402,7 @@ int main(int argc, char* argv[]) {
 		return -1;
 	if(!game.readchats("ru"))
 		return -1;
-	//main_util();
+	main_util();
 	initialize();
 	game.clear();
 	game.add("Тестирование вывода информации в консоль для всех жителей городов %1.", "NRK");

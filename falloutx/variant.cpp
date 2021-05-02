@@ -95,16 +95,21 @@ int	variant::getavatar() const {
 }
 
 const char* variant::getname() const {
-	auto& e = bsdata<varianti>::elements[type];
-	auto ps = e.source;
-	if(!ps)
-		return "array?";
-	if(!e.fields[0])
-		return "name?";
-	auto v = *((const char**)((char*)ps->ptr(value) + e.fields[0]));
-	if(!v)
-		return "null?";
-	return v;
+	if(type == Creature) {
+		auto p = (creaturei*)getpointer();
+		return p->getname();
+	} else {
+		auto& e = bsdata<varianti>::elements[type];
+		auto ps = e.source;
+		if(!ps)
+			return "array?";
+		if(!e.fields[0])
+			return "name?";
+		auto v = *((const char**)((char*)ps->ptr(value) + e.fields[0]));
+		if(!v)
+			return "null?";
+		return v;
+	}
 }
 
 const char* variant::getdescription() const {

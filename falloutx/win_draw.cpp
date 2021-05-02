@@ -289,3 +289,14 @@ void draw::settimer(unsigned milleseconds) {
 	else
 		KillTimer(hwnd, InputTimer);
 }
+
+void draw::getcursor(point& screen) {
+	POINT pt = {};
+	GetCursorPos(&pt);
+	screen.x = (short)pt.x;
+	screen.y = (short)pt.y;
+}
+
+void draw::setcursor(point screen) {
+	SetCursorPos(screen.x, screen.y);
+}

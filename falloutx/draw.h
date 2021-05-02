@@ -145,7 +145,7 @@ struct hoti {
 	int					param, param2; // command context or parameters
 	void*				object; // command object
 	explicit operator bool() const { return key != 0; }
-	void				zero() { key = InputUpdate; }
+	void				zero();
 };
 struct resei {
 	const char*			name;
@@ -234,6 +234,7 @@ rect					getarea();
 int						getbpp();
 color					getcolor(color normal, unsigned flags);
 color					getcolor(rect rc, color normal, color hilite, unsigned flags);
+void					getcursor(point& screen);
 int						getheight();
 int						getresult();
 int						getwidth();
@@ -276,6 +277,7 @@ void					set(void(*proc)(int& x, int& y, int x0, int x2, int* max_width, int& w,
 void					setcaption(const char* string);
 void					setclip(rect rc);
 inline void				setclip() { clipping.set(0, 0, getwidth(), getheight()); }
+void					setcursor(point screen);
 void					settimer(unsigned milleseconds);
 const char*				skiptr(const char* string);
 void					spline(point* points, int n);

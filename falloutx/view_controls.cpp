@@ -11,6 +11,14 @@ struct number_widget {
 	int					frame;
 	unsigned			start;
 };
+struct action_widget {
+	action_s			action;
+	fnevent				proc;
+	void*				object;
+	int					param;
+	fntext				getname;
+	void				execute();
+};
 }
 
 static bool				break_modal;
@@ -24,8 +32,12 @@ static color			color_values[256];
 static fnevent			current_stage;
 static surface			original_surface(640, 480, 32);
 static unsigned			tick;
-static unsigned			cursor_position;
+static unsigned			caret_position;
+static unsigned			stamp_position;
+static point			mouse_position;
+static unsigned			stamp_pressed;
 drawable				draw::cursor;
+static adat<action_widget, 24> contextmenu;
 static adat<number_widget, 24> number_widgets;
 
 unsigned getunsigedtick();
@@ -75,6 +87,14 @@ static number_widget* get_number_widget(point pt, int value) {
 	return p;
 }
 
+void action_widget::execute() {
+	if(!proc)
+		return;
+	hot.object = object;
+	hot.param = param;
+	proc();
+}
+
 unsigned draw::getuitime() {
 	if(!tick)
 		tick = getunsigedtick();
@@ -83,7 +103,7 @@ unsigned draw::getuitime() {
 
 void draw::openform() {
 	number_widgets.clear();
-	cursor_position = 0xFFFFFFFF;
+	caret_position = 0xFFFFFFFF;
 }
 
 void draw::closeform() {
@@ -96,6 +116,15 @@ void draw::setpallette(int daylight) {
 		color_values[i].b = color_pallette[i * 3 + 2] * daylight;
 	}
 	draw::palt = color_values;
+}
+
+void draw::addaction(action_s a, fnevent proc, void* object, int param, fntext getname) {
+	auto p = contextmenu.add();
+	p->action = a;
+	p->object = object;
+	p->proc = proc;
+	p->param = param;
+	p->getname = getname;
 }
 
 bool draw::radio(int x, int y, int cicle, unsigned key) {
@@ -342,7 +371,7 @@ static void remove_symbol() {
 	if(!m)
 		return;
 	memmove(p + i, p + i + 1, m);
-	cursor_position = i;
+	caret_position = i;
 }
 
 static void add_symbol() {
@@ -354,51 +383,51 @@ static void add_symbol() {
 	memmove(p + i + 1, p + i, c);
 	p[i + c + 1] = 0;
 	p[i] = s;
-	cursor_position = i + 1;
+	caret_position = i + 1;
 }
 
 void draw::seteditpos(unsigned index) {
-	cursor_position = index;
+	caret_position = index;
 }
 
 void draw::edit(int x, int y, int width, char* title, unsigned maximum) {
 	if(!title)
 		return;
 	unsigned lenght = zlen(title);
-	if(cursor_position > lenght)
-		cursor_position = lenght;
+	if(caret_position > lenght)
+		caret_position = lenght;
 	//line(x, y, x + width, y, colors::red);
 	text(x, y, title);
 	auto frame = (getuitime() / 200) % 3;
 	if(frame != 0) {
-		auto x1 = x + textw(title, cursor_position);
+		auto x1 = x + textw(title, caret_position);
 		rectf({x1 - 1, y - 1, x1 + 2, y + texth() - 1}, fore, 192);
 	}
 	switch(hot.key) {
 	case KeyLeft:
-		if(cursor_position > 0)
-			execute(setint, cursor_position - 1, 0, &cursor_position);
+		if(caret_position > 0)
+			execute(setint, caret_position - 1, 0, &caret_position);
 		break;
 	case KeyRight:
-		if(cursor_position < lenght)
-			execute(setint, cursor_position + 1, 0, &cursor_position);
+		if(caret_position < lenght)
+			execute(setint, caret_position + 1, 0, &caret_position);
 		break;
 	case KeyHome:
-		execute(setint, 0, 0, &cursor_position);
+		execute(setint, 0, 0, &caret_position);
 		break;
 	case KeyEnd:
-		execute(setint, lenght, 0, &cursor_position);
+		execute(setint, lenght, 0, &caret_position);
 		break;
 	case KeyBackspace:
-		if(cursor_position > 0)
-			execute(remove_symbol, cursor_position - 1, 0, title);
+		if(caret_position > 0)
+			execute(remove_symbol, caret_position - 1, 0, title);
 		break;
 	case KeyDelete:
-		execute(remove_symbol, cursor_position, 0, title);
+		execute(remove_symbol, caret_position, 0, title);
 		break;
 	case InputSymbol:
 		if(lenght < maximum - 1 && hot.param >= ' ')
-			execute(add_symbol, cursor_position, hot.param, title);
+			execute(add_symbol, caret_position, hot.param, title);
 		break;
 	}
 }
@@ -466,17 +495,19 @@ void draw::animate(int x, int y, sprite* ps, int cicle, int fps, int frame, int 
 }
 
 bool draw::istips(unsigned t) {
-	static unsigned	tips_stamp;
-	static point	postion;
-	if(postion == hot.mouse)
-		return (getuitime() - tips_stamp) >= t;
-	postion = hot.mouse;
-	tips_stamp = getuitime();
-	return false;
+	if(!stamp_position)
+		return false;
+	return (getuitime() - stamp_position) >= t;
+}
+
+bool draw::ispressed(unsigned t) {
+	if(!stamp_pressed)
+		return false;
+	return (getuitime() - stamp_pressed) >= t;
 }
 
 bool draw::istipsonetime() {
-	static point	position;
+	static point position;
 	if(hot.key == MouseLeft || hot.key == MouseRight)
 		position = hot.mouse;
 	if(position == hot.mouse)
@@ -573,15 +604,99 @@ void draw::initialize() {
 	colors::special = color_values[ColorCheck];
 }
 
+static action_widget* context_menu() {
+	auto ps = gres(INTRFACE);
+	if(!ps)
+		return 0;
+	screenshoot screen;
+	openform();
+	point cps; getcursor(cps);
+	const auto size = 40;
+	auto pt = hot.mouse;
+	auto menu = contextmenu;
+	auto height = menu.getcount() * size;
+	while(ismodal()) {
+		screen.restore();
+		cursor.set(None, 0);
+		image(pt.x, pt.y, INTRFACE, 250);
+		auto x = pt.x + 48;
+		auto y = pt.y + 40;
+		auto i1 = 0;
+		auto i2 = (hot.mouse.y - pt.y) / size;
+		for(auto& e : menu) {
+			auto i = bsdata<actioni>::elements[e.action].avatar;
+			if(i1 != i2)
+				i++;
+			else {
+				switch(hot.key) {
+				case MouseLeft:
+				case MouseRight:
+					execute(buttonparam, (int)&e);
+					break;
+				}
+			}
+			image(x, y, ps, ps->ganim(i, 0), 0);
+			y += 40;
+			i1++;
+		}
+		domodal();
+	}
+	closeform();
+	setcursor(cps);
+	return (action_widget*)getresult();
+}
+
 static void standart_domodal() {
-	image(hot.mouse.x + cursor.x, hot.mouse.y + cursor.y,
-		gres(cursor.rid),
+	static void* tips_object;
+	auto x = hot.mouse.x + cursor.x;
+	auto y = hot.mouse.y + cursor.y;
+	image(x, y, gres(cursor.rid),
 		cursor.frame + getuitime() % (cursor.frame_stop - cursor.frame_start + 1), 0);
+	if(contextmenu && istips(200)) {
+		auto& e = contextmenu[0];
+		auto i = bsdata<actioni>::elements[e.action].avatar;
+		image(x+48, y+40, INTRFACE, i + 1, 0);
+		if(tips_object != e.object) {
+			tips_object = e.object;
+			if(e.getname) {
+				char temp[260]; stringbuilder sb(temp);
+				game.add("Это %1.", e.getname(e.object, sb));
+			}
+		}
+	} else
+		tips_object = 0;
 	hot.key = rawinput();
 	tick = getunsigedtick();
 	apply_pallette_cicle((unsigned char*)color_values, tick);
-	if(!hot.key)
+	switch(hot.key) {
+	case 0:
 		exit(0);
+		break; // If window closed
+	case MouseMove:
+		if(mouse_position != hot.mouse) {
+			mouse_position = hot.mouse;
+			stamp_position = getuitime();
+		}
+		break;
+	case MouseLeft:
+		if(hot.pressed)
+			stamp_pressed = getuitime();
+		else {
+			stamp_pressed = 0;
+			if(contextmenu) {
+				hot.zero();
+				contextmenu[0].execute();
+			}
+		}
+		break;
+	}
+	if(contextmenu && ispressed()) {
+		hot.zero();
+		auto pa = context_menu();
+		hot.zero();
+		if(pa)
+			pa->execute();
+	}
 }
 
 bool draw::isdefaultinput() {
@@ -590,6 +705,7 @@ bool draw::isdefaultinput() {
 
 bool draw::ismodalex() {
 	cursor.set(INTRFACE, 267, {0, 0});
+	contextmenu.clear();
 	domodal = standart_domodal;
 	return true;
 }

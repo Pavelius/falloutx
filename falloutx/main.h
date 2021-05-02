@@ -110,6 +110,7 @@ enum item_s : unsigned short {
 	NoItem, Cookie,
 	LeatherArmorMarkII,
 	MetalArmor, MetalArmorMarkII,
+	AdvancedPowerArmor, AdvPowerArmorMKII,
 	Knife, Spear,
 	X10mmPistol, HuntingRifle, X10mmSMG,
 	X10mmAP, X10mmJHP, X12GaShotgunShells, X14mmAP, X223FMJ, X2mmEC, X44MagnumFMJ, X44MagnumJHP,
@@ -128,36 +129,6 @@ enum settlement_s : unsigned char {
 };
 enum itemkind_s : unsigned char {
 	Weapon, Ammo, Armor, Drug, Misc,
-};
-enum light_flag : short unsigned {
-	NorthSouth = 0,
-	EastWest = 0x0800,
-	NorthCorner = 0x1000,
-	SouthCorner = 0x2000,
-	EastCorner = 0x4000,
-	WestCorner = 0x8000
-};
-enum action_flag {
-	KneelDownWhenUsing = 0x0001,
-	CanBeUsed = 0x0008,
-	UseOnSomething = 0x0010,
-	CanLookAt = 0x0020,
-	CanTalkWith = 0x0040,
-	CanPickUp = 0x0080,
-};
-enum flag_all {
-	Flat = 0x00000008,
-	NoBlock = 0x00000010, // doesn't block the tile
-	MultiHex = 0x00000800,
-	NoHighlight = 0x00001000, // doesn't highlight the border; used for containers
-	TransRed = 0x00004000,
-	TransNone = 0x00008000, // opaque
-	TransWall = 0x00010000,
-	TransGlass = 0x00020000,
-	TransSteam = 0x00040000,
-	TransEnergy = 0x00080000,
-	LightThru = 0x20000000,
-	ShootThru = 0x80000000 // Можно стрелять через него
 };
 enum critical_effect_s : unsigned {
 	KnockOut = 0x10000000,
@@ -446,6 +417,7 @@ public:
 	int					getcountmax() const;
 	const itemi&		geti() const;
 	const char*			getname() const { return geti().txt.name; }
+	static const char*	getobjectname(const void* object, stringbuilder& sb);
 	bool				isarmor() const { return geti().isarmor(); }
 	bool				isranged() const { return geti().isranged(); }
 	bool				isweapon() const { return geti().isweapon(); }
@@ -742,6 +714,7 @@ struct anminfo {
 	static const anminfo* get(const sprite* p);
 	static const anminfo* get(res_s rid);
 };
+void					addaction(action_s a, fnevent proc, void* object, int param, fntext getname = 0);
 void					animate(int x, int y, sprite* ps, int cicle, int fps = 6, int frame = -1, int frame_end = -2);
 void					background(int cicle);
 bool					button(int x, int y, int width, const char* string, unsigned key, rect* return_rc = 0);
@@ -765,6 +738,7 @@ unsigned				getuitime();
 point					h2m(point pt);
 void					image(int x, int y, res_s id, int cicle, int flags = 0, unsigned char alpha = 0xFF);
 bool					isdefaultinput();
+bool					ispressed(unsigned t = 1000); // Return true if tips needs to be shown
 bool					istips(unsigned t = 1000); // Return true if tips needs to be shown
 bool					istipsonetime();
 bool					label(int x, int& y, int width, const char* format, unsigned key, bool bullet = false);

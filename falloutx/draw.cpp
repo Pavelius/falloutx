@@ -2109,3 +2109,10 @@ bool draw::execute(const shortcut* pf) {
 	}
 	return false;
 }
+
+void draw::hoti::zero() {
+	hot.key = 0;
+	hot.object = 0;
+	hot.param = 0;
+	hot.param2 = 0;
+}

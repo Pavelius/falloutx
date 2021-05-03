@@ -36,6 +36,7 @@ static unsigned			caret_position;
 static unsigned			stamp_position;
 static point			mouse_position;
 static unsigned			stamp_pressed;
+static bool				action_mode;
 drawable				draw::cursor;
 static adat<action_widget, 24> contextmenu;
 static adat<number_widget, 24> number_widgets;
@@ -452,6 +453,47 @@ void draw::background(int cicle) {
 	draw::image(0, 0, ps, frame, ImageNoOffset, 255);
 }
 
+void draw::scrollup(const rect& rc, int& origin, int maximum) {
+	if(maximum == -1)
+		return;
+	auto height = rc.height();
+	if(origin > maximum - height)
+		origin = maximum - height;
+	if(origin < 0)
+		origin = 0;
+	if(ishilite(rc)) {
+		rect ru = {rc.x1, rc.y1, rc.x2, rc.y1 + texth() + 2};
+		rect rd = {rc.x1, rc.y2 - texth() - 2, rc.x2, rc.y2};
+		if(ishilite(ru)) {
+			if(origin > 0) {
+				cursor.set(INTRFACE, 268);
+				if(hot.key == MouseLeft && hot.pressed)
+					execute(setint, origin - texth(), 0, &origin);
+			}
+		} else if(ishilite(rd)) {
+			if(origin < maximum - height) {
+				cursor.set(INTRFACE, 269);
+				if(hot.key == MouseLeft && hot.pressed)
+					execute(setint, origin + texth(), 0, &origin);
+			}
+		}
+		switch(hot.key) {
+		case MouseWheelUp:
+			execute(setint, origin - texth(), 0, &origin);
+			break;
+		case MouseWheelDown:
+			execute(setint, origin + texth(), 0, &origin);
+			break;
+		}
+	}
+}
+
+void draw::scrollup(const rect& rc, int& origin, int& maximum, const char* format) {
+	scrollup(rc, origin, maximum);
+	state push; setclip(rc);
+	maximum = textf(rc.x1, rc.y1 - origin, rc.width(), format);
+}
+
 void draw::image(int x, int y, res_s id, int cicle, int flags, unsigned char alpha) {
 	auto p = gres(id);
 	if(!p)
@@ -612,37 +654,43 @@ static action_widget* context_menu() {
 	openform();
 	point cps; getcursor(cps);
 	const auto size = 40;
-	auto pt = hot.mouse;
+	auto push_action = action_mode;
+	auto push_mouse = hot.mouse;
 	auto menu = contextmenu;
 	auto height = menu.getcount() * size;
+	action_mode = false;
 	while(ismodal()) {
 		screen.restore();
 		cursor.set(None, 0);
-		image(pt.x, pt.y, INTRFACE, 250);
-		auto x = pt.x + 48;
-		auto y = pt.y + 40;
+		image(push_mouse.x, push_mouse.y, INTRFACE, 250);
+		auto x = push_mouse.x + 48;
+		auto y = push_mouse.y + 40;
 		auto i1 = 0;
-		auto i2 = (hot.mouse.y - pt.y) / size;
+		auto i2 = (hot.mouse.y - push_mouse.y) / size;
+		if(i2 > menu.getcount() - 1)
+			i2 = menu.getcount() - 1;
+		if(i2 < 0)
+			i2 = 0;
 		for(auto& e : menu) {
 			auto i = bsdata<actioni>::elements[e.action].avatar;
-			if(i1 != i2)
-				i++;
-			else {
+			if(i1 == i2) {
 				switch(hot.key) {
 				case MouseLeft:
 				case MouseRight:
 					execute(buttonparam, (int)&e);
 					break;
 				}
-			}
+			} else
+				i++;
 			image(x, y, ps, ps->ganim(i, 0), 0);
-			y += 40;
-			i1++;
+			y += 40; i1++;
 		}
 		domodal();
 	}
-	closeform();
 	setcursor(cps);
+	hot.mouse = push_mouse;
+	action_mode = push_action;
+	closeform();
 	return (action_widget*)getresult();
 }
 
@@ -650,21 +698,28 @@ static void standart_domodal() {
 	static void* tips_object;
 	auto x = hot.mouse.x + cursor.x;
 	auto y = hot.mouse.y + cursor.y;
-	image(x, y, gres(cursor.rid),
-		cursor.frame + getuitime() % (cursor.frame_stop - cursor.frame_start + 1), 0);
-	if(contextmenu && istips(200)) {
-		auto& e = contextmenu[0];
-		auto i = bsdata<actioni>::elements[e.action].avatar;
-		image(x+48, y+40, INTRFACE, i + 1, 0);
-		if(tips_object != e.object) {
-			tips_object = e.object;
-			if(e.getname) {
-				char temp[260]; stringbuilder sb(temp);
-				game.add("Это %1.", e.getname(e.object, sb));
-			}
+	if(action_mode) {
+		auto ps = gres(INTRFACE);
+		if(ps) {
+			image(x, y, ps, ps->ganim(250, 0), 0);
+			if(contextmenu && istips(500)) {
+				auto& e = contextmenu[0];
+				auto frame = bsdata<actioni>::elements[e.action].avatar;
+				image(x + 48, y + 40, ps, ps->ganim(frame + 1, 0), 0);
+				if(tips_object != e.object) {
+					tips_object = e.object;
+					if(e.getname) {
+						char temp[260]; stringbuilder sb(temp);
+						game.add("Это %1.", e.getname(e.object, sb));
+					}
+				}
+			} else
+				tips_object = 0;
 		}
-	} else
-		tips_object = 0;
+	} else {
+		image(x, y, gres(cursor.rid),
+			cursor.frame + getuitime() % (cursor.frame_stop - cursor.frame_start + 1), 0);
+	}
 	hot.key = rawinput();
 	tick = getunsigedtick();
 	apply_pallette_cicle((unsigned char*)color_values, tick);
@@ -683,24 +738,42 @@ static void standart_domodal() {
 			stamp_pressed = getuitime();
 		else {
 			stamp_pressed = 0;
-			if(contextmenu) {
+			if(action_mode && contextmenu) {
 				hot.zero();
 				contextmenu[0].execute();
 			}
 		}
 		break;
+	case MouseRight:
+		if(isactionmode()) {
+			if(hot.pressed) {
+				setactionmode(false);
+				hot.zero();
+			}
+		}
+		break;
 	}
-	if(contextmenu && ispressed()) {
-		hot.zero();
-		auto pa = context_menu();
-		hot.zero();
-		if(pa)
-			pa->execute();
+	if(action_mode) {
+		if(contextmenu && ispressed()) {
+			hot.zero();
+			auto pa = context_menu();
+			hot.zero();
+			if(pa)
+				pa->execute();
+		}
 	}
+}
+
+bool draw::isactionmode() {
+	return action_mode;
 }
 
 bool draw::isdefaultinput() {
 	return domodal == standart_domodal;
+}
+
+void draw::setactionmode(bool v) {
+	action_mode = v;
 }
 
 bool draw::ismodalex() {

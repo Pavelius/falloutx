@@ -322,7 +322,7 @@ struct drawable : public point {
 	void				setposition(point v) { x = v.x; y = v.y; }
 	bool				update();
 };
-struct drawablea : adat<drawable*, 256> {
+struct drawablea : adat<drawable*, 512> {
 	void				select();
 	void				sortz();
 };
@@ -473,7 +473,6 @@ class actor : public drawable, public nameable {
 	animate_s			animate = AnimateDeadForward;
 	unsigned char		direction = 0;
 	item				armor, hands[2];
-	void				reanimate();
 public:
 	animate_s			getanimate() const { return animate; }
 	static animate_s	getanimate(animate_s v, int w);
@@ -487,6 +486,7 @@ public:
 	const item&			getweapon() const { return getweapon(0); }
 	static bool			isweaponanimate(animate_s v);
 	static void			preview(int x, int y, gender_s gender, item_s armor, item_s weapon, unsigned tick);
+	void				reanimate();
 	void				setanimate(animate_s v, bool force = false);
 	void				setdirection(unsigned char v);
 };
@@ -695,12 +695,19 @@ struct areai {
 	static const int	width = 128;
 	static const int	height = 128;
 	unsigned short		tiles[width * height];
+	unsigned short		walls[width * height * 4];
 	void				clear();
+	void				editor();
 	static int			getx(indext i) { return i % width; }
 	static int			gety(indext i) { return i / width; }
+	static int			gethx(indext i) { return i % (width * 2); }
+	static int			gethy(indext i) { return i / (width * 2); }
 	static indext		geti(int x, int y) { return y * width + x; }
+	static indext		geth(int x, int y) { return y * width * 2 + x; }
 	int					gettile(indext i) const { return tiles[i]; }
+	int					getwall(indext i) const { return walls[i]; }
 	void				set(indext i, int v);
+	void				setwall(indext i, int v);
 	void				set(indext i, int v, int w, int h);
 	void				set(indext i, const tilei& e, int w, int h);
 };
@@ -737,6 +744,7 @@ const char*				getname(res_s id);
 unsigned				getuitime();
 point					h2m(point pt);
 void					image(int x, int y, res_s id, int cicle, int flags = 0, unsigned char alpha = 0xFF);
+bool					isactionmode();
 bool					isdefaultinput();
 bool					ispressed(unsigned t = 1000); // Return true if tips needs to be shown
 bool					istips(unsigned t = 1000); // Return true if tips needs to be shown
@@ -756,6 +764,9 @@ void					openform();
 bool					radio(int x, int y, int cicle, unsigned key);
 void					runstage();
 point					s2m(point s); // Convert screen coordinates to tile index
+void					scrollup(const rect& rc, int& origin, int maximum);
+void					scrollup(const rect& rc, int& origin, int& maximum, const char* format);
+void					setactionmode(bool active);
 void					setcolor(color_s v);
 void					seteditpos(unsigned index);
 void					setfocus(variant v);

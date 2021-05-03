@@ -39,10 +39,9 @@ int	actor::getcicle(draw::res_s& rid, animate_s v, gender_s gender, item_s armor
 }
 
 void actor::reanimate() {
-	auto rid = getrid(getarmor(), getgender());
-	if(!rid)
-		rid = (getgender() == Male) ? draw::HMJMPS : draw::HFJMPS;
-	set(rid, animate * 6 + direction);
+	draw::res_s rid;
+	auto cicle = getcicle(rid, animate, getgender(), getarmor(), getweapon(), direction);
+	set(rid, cicle);
 	next_stamp = draw::getuitime();
 }
 

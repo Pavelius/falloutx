@@ -118,22 +118,17 @@ void itema::paint(const rect& rc, int& origin, int mode, point pts) {
 			break;
 		if(gear(x, y, width, element_height - 1, *data[i]))
 			y += element_height;
+		//line(x, y, x + width, y, colors::red);
 	}
 }
 
-static void render_inventory(creaturei& player, bool info_mode) {
+static void render_inventory(creaturei& player) {
 	hilite_item = 0;
 	int x, y, sx, sy;
 	static int origin;
 	window(x, y, sx, sy, 48, -48);
-	if(ishilite({x, y, x + sx, y + sy})) {
-		if(info_mode)
-			cursor.set(INTRFACE, 250);
-		else
-			cursor.set(INTRFACE, 286);
-	}
 	player.preview(x + 206, y + 116, player.getgender(), player.getarmor(), player.getweapon(), getuitime() / 300);
-	if(info_mode && item_info)
+	if(isactionmode() && item_info)
 		itemtext(x + 295, y + 48, 148, 180, *item_info);
 	else
 		chartext(x + 295, y + 48, 148, 180, player);
@@ -144,22 +139,23 @@ static void render_inventory(creaturei& player, bool info_mode) {
 	player.getitems(source);
 	source.sort();
 	source.paint({x + 42, y + 40, x + 42 + 70, y + 40 + 300}, origin, 1, {(short)(x + 42 + 80), (short)(y + 40 - 4)});
-	if(info_mode && hilite_item) {
+	if(buttonf(x + 432, y + 322, 299, 300, KeyEscape, false))
+		buttoncancel();
+	if(isactionmode() && hilite_item) {
 		addaction(Look, look_item, hilite_item, 0, item::getobjectname);
 		addaction(Drop, drop_item, hilite_item, 0);
 		if(hilite_item->isweapon() && hilite_item->getclipcount())
 			addaction(Unload, unload_item, hilite_item, 0);
+		addaction(NoAction, 0, 0, 0);
 	}
-	if(buttonf(x + 432, y + 322, 299, 300, KeyEscape, false))
-		buttoncancel();
 	consoleview();
 }
 
-item* choose_drag_target(creaturei& player, screenshoot& screen, item& source) {
+static item* choose_drag_target(creaturei& player, screenshoot& screen, item& source) {
 	openform();
 	while(ismodal()) {
 		screen.restore();
-		render_inventory(player, false);
+		render_inventory(player);
 		cursor.set(INVEN, source.geti().avatar.inventory, {0, 32});
 		domodal();
 		if(!hot.pressed)
@@ -170,48 +166,41 @@ item* choose_drag_target(creaturei& player, screenshoot& screen, item& source) {
 }
 
 void creaturei::inventory() {
-	auto info_mode = 0;
 	screenshoot screen;
+	setactionmode(false);
 	openform();
 	while(ismodal()) {
 		screen.restore();
-		render_inventory(*this, info_mode);
+		cursor.set(INTRFACE, 286);
+		render_inventory(*this);
 		domodal();
 		switch(hot.key) {
 		case MouseRight:
-			if(hot.pressed) {
-				info_mode = !info_mode;
-				if(!info_mode)
-					item_info = 0;
-			}
+			if(hot.pressed && !isactionmode())
+				setactionmode(true);
 			break;
 		case MouseLeft:
-			if(hot.pressed && !hilite_item)
-				info_mode = 0;
-			else if(hot.pressed && hilite_item) {
-				if(info_mode) {
-					//if(*hilite_item)
-					//	item_info = hilite_item;
-				} else {
-					auto source = hilite_item;
-					auto element = *hilite_item;
-					if(!element)
-						break;
-					source->addcount(-1);
-					element.setcount(1);
-					update();
-					auto target = choose_drag_target(*this, screen, element);
-					if(target) {
-						bool run = true;
-						if(target == &getarmor() && !element.isarmor())
-							run = false;
-						if(run && !target->join(element))
-							additem(element);
-					}
-					if(element)
-						source->join(element);
-					update();
+			if(!isactionmode() && hot.pressed && hilite_item) {
+				auto source = hilite_item;
+				auto element = *hilite_item;
+				if(!element)
+					break;
+				source->addcount(-1);
+				element.setcount(1);
+				update();
+				reanimate();
+				auto target = choose_drag_target(*this, screen, element);
+				if(target) {
+					bool run = true;
+					if(target == &getarmor() && !element.isarmor())
+						run = false;
+					if(run && !target->join(element))
+						additem(element);
 				}
+				if(element)
+					source->join(element);
+				update();
+				reanimate();
 			}
 			break;
 		}
@@ -224,6 +213,14 @@ static void inform(const char* format, ...) {
 		return;
 	stringbuilder sb(chat_information);
 	sb.addv(format, xva_start(format));
+}
+
+static void look_trade_item() {
+	char temp[1024]; stringbuilder sb(temp);
+	auto p = (item*)hot.object;
+	sb.add("Это %1.", p->getname());
+	p->addtext(sb);
+	inform(temp);
 }
 
 void creaturei::trade(creaturei& opponent) {
@@ -247,7 +244,9 @@ void creaturei::trade(creaturei& opponent) {
 	auto opponent_mult = 250 + difference;
 	auto dlg = "barter";
 	int opponent_act;
+	int text_origin = 0, text_maximum = 0;
 	inform(opponent.getspeech(dlg, 1));
+	setactionmode(false);
 	while(ismodal()) {
 		opponent_act = 0;
 		hilite_item = 0;
@@ -259,19 +258,19 @@ void creaturei::trade(creaturei& opponent) {
 		if(chat_information[0]) {
 			rect rc = {140, 232, 140 + 370, 232 + 45};
 			state push; setclip(rc);
-			textf(rc.x1, rc.y1, rc.width(), chat_information);
+			scrollup(rc, text_origin, text_maximum, chat_information);
 		}
 		source.clear(); getitems(source); source.sort();
 		source.paint({108, 328, 108 + 64, 328 + 136}, player_origin, 2, {190, 346});
 		source.clear(); player_trade.getitems(source); source.sort();
-		source.paint({244, 298, 244 + 58, 298 + 164}, player_trade_origin, 1, {202, 406});
+		source.paint({244, 318, 244 + 64, 318 + 136}, player_trade_origin, 1, {202, 406});
 		auto player_cost = source.getcost();
 		player_cost = player_cost * player_mult / 100;
 		preview(590, 404, opponent.getgender(), opponent.getarmor(), opponent.getweapon(), 3);
 		source.clear(); opponent.getitems(source); source.sort();
 		source.paint({460, 328, 460 + 64, 328 + 136}, opponent_origin, 2, {421, 346});
 		source.clear(); opponent_trade.getitems(source); source.sort();
-		source.paint({332, 298, 332 + 58, 298 + 164}, opponent_trade_origin, 1, {416, 406});
+		source.paint({332, 318, 332 + 64, 318 + 136}, opponent_trade_origin, 1, {416, 406});
 		auto opponent_cost = source.getcost();
 		opponent_cost = opponent_cost * opponent_mult / 100;
 		auto old_fore = fore;
@@ -291,11 +290,16 @@ void creaturei::trade(creaturei& opponent) {
 		}
 		if(buttonf(583, 452, 96, 95, KeyEscape, false))
 			execute(buttoncancel);
+		if(isactionmode() && hilite_item) {
+			addaction(Look, look_trade_item, hilite_item, 0);
+			addaction(NoAction, 0, 0, 0);
+		}
 		domodal();
 		if(opponent_act)
 			inform(opponent.getspeech(dlg, opponent_act));
-		if(hot.key == MouseLeft) {
-			if(hilite_item) {
+		switch(hot.key) {
+		case MouseLeft:
+			if(!isactionmode() && hilite_item) {
 				if(hot.pressed) {
 					inform(hilite_item->geti().txt.text);
 					if(isgear(hilite_item))
@@ -308,6 +312,11 @@ void creaturei::trade(creaturei& opponent) {
 						opponent.additem(*hilite_item);
 				}
 			}
+			break;
+		case MouseRight:
+			if(hot.pressed && !isactionmode())
+				setactionmode(true);
+			break;
 		}
 	}
 	push.restore();

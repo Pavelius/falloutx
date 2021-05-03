@@ -10,6 +10,10 @@ void areai::set(indext i, int v) {
 	tiles[i] = v;
 }
 
+void areai::setwall(indext i, int v) {
+	walls[i] = v;
+}
+
 void areai::set(indext i, int v, int w, int h) {
 	auto x0 = getx(i), y0 = gety(i);
 	auto x1 = x0 + w, y1 = y0 + h;

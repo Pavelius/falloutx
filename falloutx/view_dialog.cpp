@@ -235,47 +235,6 @@ int answers::choose(const char* title) const {
 	return getresult();
 }
 
-static void scrollup(const rect& rc, int& origin, int maximum) {
-	if(maximum == -1)
-		return;
-	auto height = rc.height();
-	if(origin > maximum - height)
-		origin = maximum - height;
-	if(origin < 0)
-		origin = 0;
-	if(ishilite(rc)) {
-		rect ru = {rc.x1, rc.y1, rc.x2, rc.y1 + texth() + 2};
-		rect rd = {rc.x1, rc.y2 - texth() - 2, rc.x2, rc.y2};
-		if(ishilite(ru)) {
-			if(origin > 0) {
-				cursor.set(INTRFACE, 268);
-				if(hot.key == MouseLeft && hot.pressed)
-					execute(setint, origin - texth(), 0, &origin);
-			}
-		} else if(ishilite(rd)) {
-			if(origin < maximum - height) {
-				cursor.set(INTRFACE, 269);
-				if(hot.key == MouseLeft && hot.pressed)
-					execute(setint, origin + texth(), 0, &origin);
-			}
-		}
-		switch(hot.key) {
-		case MouseWheelUp:
-			execute(setint, origin - texth(), 0, &origin);
-			break;
-		case MouseWheelDown:
-			execute(setint, origin + texth(), 0, &origin);
-			break;
-		}
-	}
-}
-
-static void scrollup(const rect& rc, int& origin, int& maximum, const char* format) {
-	scrollup(rc, origin, maximum);
-	state push; setclip(rc);
-	maximum = textf(rc.x1, rc.y1 - origin, rc.width(), format);
-}
-
 static void trade_creature() {
 	auto opponent = (creaturei*)hot.object;
 	game.getplayer().trade(*opponent);

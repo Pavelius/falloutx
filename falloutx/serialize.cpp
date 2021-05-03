@@ -54,3 +54,25 @@ void creaturei::tofile(const char* name) const {
 		file << v.getnameabr() << ": " << get(v) << " ";
 	file << eol;
 }
+
+static bool serial(areai& e, const char* name, bool write_mode) {
+	char temp[260]; stringbuilder sb(temp);
+	sb.add("maps/%1.gmp", name);
+	io::file file(temp, write_mode ? StreamWrite : StreamRead);
+	if(!file)
+		return false;
+	archive ar(file, write_mode);
+	if(!ar.signature("MAP"))
+		return false;
+	ar.set(e);
+	ar.set(bsdata<scenery>::source);
+	return true;
+}
+
+bool areai::write(const char* url) const {
+	return serial(*const_cast<areai*>(this), url, true);
+}
+
+bool areai::read(const char* url) {
+	return serial(*const_cast<areai*>(this), url, false);
+}

@@ -42,8 +42,10 @@ static void test_adventure() {
 	player.setdirection(2);
 	player.setanimate(AnimateStand, true);
 	game.setcamera({1000, 100});
-	loc.clear();
-	loc.set(loc.geti(0, 0), bsdata<tilei>::elements[2], loc.width, loc.height);
+	if(!loc.read("test")) {
+		loc.clear();
+		loc.set(loc.geti(0, 0), bsdata<tilei>::elements[2], loc.width, loc.height);
+	}
 	auto opponent = bsdata<creaturei>::add();
 	opponent->create(Narg);
 	opponent->add(Knife, 1);
@@ -62,8 +64,10 @@ static void test_adventure() {
 
 static void test_game() {
 	game.setcamera({1000, 100});
-	loc.clear();
-	loc.set(loc.geti(0, 0), bsdata<tilei>::elements[2], loc.width, loc.height);
+	if(!loc.read("test")) {
+		loc.clear();
+		loc.set(loc.geti(0, 0), bsdata<tilei>::elements[2], loc.width, loc.height);
+	}
 	loc.editor();
 }
 

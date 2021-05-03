@@ -194,7 +194,6 @@ public:
 };
 // Abstract array vector
 class array {
-	unsigned						size;
 	unsigned						count_maximum;
 	void							grow(unsigned offset, unsigned delta);
 	void							shrink(unsigned offset, unsigned delta);
@@ -202,6 +201,7 @@ class array {
 public:
 	void*							data;
 	unsigned						count;
+	unsigned						size;
 	typedef int(*pcompare)(const void* p1, const void* p2, void* param);
 	constexpr array(unsigned size = 0) : size(size), count_maximum(0), data(0), count(0) {}
 	constexpr array(void* data, unsigned size, unsigned count) : size(size), count_maximum(count | 0x80000000), data(data), count(count) {}

@@ -410,7 +410,32 @@ void gamei::combat() {
 	animate(608, 477, gres(INTRFACE), 104, 10, -2, -1);
 }
 
-static void render_status() {
+static void render_actions_editor(int tile_frame, int wall_frame, int scenery_frame, int mode) {
+	auto ps = gres(INTRFACE);
+	if(!ps)
+		return;
+	auto x = 0, y = 480 - 99;
+	//image(x, y, ps, ps->ganim(16, 0), ImageNoOffset);
+	//if(buttonf(x + 210, y + 40, 47, 46, 'I', false)) {
+	//}
+	//if(buttonf(x + 210, y + 60, 18, 17, KeyEscape, false)) {
+	//}
+	//render_item(x + 265, y + 29, false);
+	//if(buttonf(x + 526, y + 38, 13, 10, 'M', false)) {
+	//}
+	//if(buttonf(x + 526, y + 58, 57, 56, 'C', false)) {
+	//}
+	//if(buttonf(x + 526, y + 78, 59, 58, 'P', false)) {
+	//}
+	//if(buttonf(x + 218, y + 6, 6, 7, 'W', false)) {
+	//}
+	//if(buttonf(x + 523, y + 6, 6, 7, 'S', false)) {
+	//}
+	//consoleview(x + 26, y + 32);
+	const auto dy = 99;
+	rect rc = {0, 480 - dy, 160, 479};
+	rectf(rc, colors::gray);
+	rectb(rc, colors::black);
 	char temp[1024]; stringbuilder sb(temp);
 	auto pt = hot.mouse + game.camera;
 	if(current_hexagon != Blocked) {
@@ -421,36 +446,15 @@ static void render_status() {
 	}
 	sb.addn("Objects %1i", objects.getcount());
 	auto push_fore = fore;
-	//setcolor(Color);
-	textf(8, 8, 200, temp);
+	setcolor(ColorInfo);
+	textf(rc.x1 + 4, rc.y1 + 4, rc.width(), temp);
 	fore = push_fore;
+	rc = {640 - 240, 480 - dy, 639, 479};
+	rectf(rc, colors::gray);
+	rectb(rc, colors::black);
 }
 
-static void render_actions_editor() {
-	auto ps = gres(INTRFACE);
-	if(!ps)
-		return;
-	auto x = 0, y = 480 - 99;
-	image(x, y, ps, ps->ganim(16, 0), ImageNoOffset);
-	if(buttonf(x + 210, y + 40, 47, 46, 'I', false)) {
-	}
-	if(buttonf(x + 210, y + 60, 18, 17, KeyEscape, false)) {
-	}
-	render_item(x + 265, y + 29, false);
-	if(buttonf(x + 526, y + 38, 13, 10, 'M', false)) {
-	}
-	if(buttonf(x + 526, y + 58, 57, 56, 'C', false)) {
-	}
-	if(buttonf(x + 526, y + 78, 59, 58, 'P', false)) {
-	}
-	if(buttonf(x + 218, y + 6, 6, 7, 'W', false)) {
-	}
-	if(buttonf(x + 523, y + 6, 6, 7, 'S', false)) {
-	}
-	consoleview(x + 26, y + 32);
-}
-
-static short unsigned choose_wall(short unsigned start) {
+static short unsigned choose_wall(short unsigned start, int& mode) {
 	openform();
 	int wall_frame = 24;
 	auto ps = gres(WALLS);
@@ -485,7 +489,7 @@ static short unsigned choose_wall(short unsigned start) {
 		}
 		domodal();
 		switch(hot.key) {
-		case KeyEnter: breakmodal(current); break;
+		case KeyEnter: mode = 2; breakmodal(current); break;
 		case KeyEscape: breakmodal(start); break;
 		case KeyLeft: current--; break;
 		case KeyRight: current++; break;
@@ -497,7 +501,7 @@ static short unsigned choose_wall(short unsigned start) {
 	return getresult();
 }
 
-static short unsigned choose_tile(short unsigned start) {
+static short unsigned choose_tile(short unsigned start, int& mode) {
 	openform();
 	auto ps = gres(TILES);
 	auto origin = 0;
@@ -508,7 +512,6 @@ static short unsigned choose_tile(short unsigned start) {
 	int current = start;
 	while(ismodal()) {
 		rectf({0, 0, 640, 480}, colors::gray);
-		auto y = tile_height;
 		if(current < 0)
 			current = 0;
 		if(current > (int)ps->cicles - 1)
@@ -530,7 +533,7 @@ static short unsigned choose_tile(short unsigned start) {
 		}
 		domodal();
 		switch(hot.key) {
-		case KeyEnter: breakmodal(current); break;
+		case KeyEnter: mode = 0; breakmodal(current); break;
 		case KeyEscape: breakmodal(start); break;
 		case KeyLeft: current--; break;
 		case KeyRight: current++; break;
@@ -542,7 +545,7 @@ static short unsigned choose_tile(short unsigned start) {
 	return getresult();
 }
 
-static short unsigned choose_scenery(short unsigned start) {
+static short unsigned choose_scenery(short unsigned start, int& mode) {
 	openform();
 	auto ps = gres(SCENERY);
 	auto origin = 0;
@@ -566,7 +569,7 @@ static short unsigned choose_scenery(short unsigned start) {
 		auto index = origin;
 		for(auto y = dy; y <= dy * my; y += dy) {
 			for(auto x = dx / 2; x < dx * mx; x += dx) {
-				image(x, y-32, ps, ps->ganim(index, getuitime()/100), 0);
+				image(x, y - 32, ps, ps->ganim(index, getuitime() / 100), 0);
 				if(current == index)
 					rectb({x - dx / 2, y - dy, x + dx / 2, y}, colors::red);
 				index++;
@@ -574,7 +577,7 @@ static short unsigned choose_scenery(short unsigned start) {
 		}
 		domodal();
 		switch(hot.key) {
-		case KeyEnter: breakmodal(current); break;
+		case KeyEnter: mode = 1; breakmodal(current); break;
 		case KeyEscape: breakmodal(start); break;
 		case KeyLeft: current--; break;
 		case KeyRight: current++; break;
@@ -586,9 +589,26 @@ static short unsigned choose_scenery(short unsigned start) {
 	return getresult();
 }
 
+static void apply_frame(int mode, int tile_frame, int scenery_frame, int wall_frame) {
+	switch(mode) {
+	case 0:
+		if(current_tile != Blocked)
+			loc.set(current_tile, tile_frame);
+		break;
+	case 1:
+		if(current_hexagon != Blocked)
+			scenery::add(current_hexagon, scenery_frame);
+		break;
+	case 2: 
+		if(current_hexagon != Blocked)
+			loc.setwall(current_hexagon, wall_frame);
+		break;
+	}
+}
+
 void areai::editor() {
 	openform();
-	int wall_frame = 1, scenery_frame = 2, tile_frame = 3;
+	int wall_frame = 1, scenery_frame = 2, tile_frame = 3, mode = 0;
 	while(ismodal()) {
 		rectf({0, 0, 640, 480}, colors::gray);
 		auto cursor_on_map = hot.mouse.in({0, 0, 640, 480 - 99});
@@ -596,27 +616,24 @@ void areai::editor() {
 			cursor.set(None, 0);
 		set_current_hexagon();
 		render_map(true);
-		render_status();
-		render_actions_editor();
+		render_actions_editor(tile_frame, wall_frame, scenery_frame, mode);
 		domodal();
 		switch(hot.key) {
-		case MouseLeft:
-			if(cursor_on_map) {
-				if(current_hexagon != Blocked)
-					loc.setwall(current_hexagon, wall_frame);
-			}
-			break;
 		case KeyDelete:
-			if(cursor_on_map) {
-				if(current_hexagon != Blocked)
-					loc.setwall(current_hexagon, 0);
-			}
+			apply_frame(mode, 0, 0, 0);
 			break;
-		case KeyEnter: scenery::add(current_hexagon, scenery_frame);  break;
-		case KeySpace: loc.set(current_tile, tile_frame); break;
-		case 'S': scenery_frame = choose_scenery(scenery_frame); break;
-		case 'C': wall_frame = choose_wall(wall_frame); break;
-		case 'T': tile_frame = choose_tile(tile_frame); break;
+		case MouseLeft:
+			if(cursor_on_map && hot.pressed)
+				apply_frame(mode, tile_frame, scenery_frame, wall_frame);
+			break;
+		case KeySpace:
+			apply_frame(mode, tile_frame, scenery_frame, wall_frame);
+			break;
+		case 'T': tile_frame = choose_tile(tile_frame, mode); break;
+		case 'S': scenery_frame = choose_scenery(scenery_frame, mode); break;
+		case 'W': wall_frame = choose_wall(wall_frame, mode); break;
+		case F5: loc.write("test"); break;
+		case F6: loc.read("test"); break;
 		}
 	}
 	closeform();

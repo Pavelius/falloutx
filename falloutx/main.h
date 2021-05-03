@@ -695,7 +695,7 @@ struct scenery : drawable {
 	indext				index;
 	short unsigned		type;
 	unsigned			flags;
-	constexpr explicit operator bool() const { return index != Blocked; }
+	constexpr explicit operator bool() const { return type != 0; }
 	static scenery*		add(indext index, short unsigned type);
 	static scenery*		find(indext index);
 	void				reanimate();
@@ -715,10 +715,12 @@ struct areai {
 	static indext		geth(int x, int y) { return y * width * 2 + x; }
 	int					gettile(indext i) const { return tiles[i]; }
 	int					getwall(indext i) const { return walls[i]; }
+	bool				read(const char* url);
 	void				set(indext i, int v);
 	void				setwall(indext i, int v);
 	void				set(indext i, int v, int w, int h);
 	void				set(indext i, const tilei& e, int w, int h);
+	bool				write(const char* url) const;
 };
 extern areai loc;
 namespace draw {

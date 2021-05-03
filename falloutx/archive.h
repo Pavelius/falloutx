@@ -15,16 +15,16 @@ struct archive {
 		set(value.count);
 		set(value.data, sizeof(value.data[0]) * value.count);
 	}
+	// All simple types and requisites
+	template<class T> void set(T& value) {
+		set(&value, sizeof(value));
+	}
 	// Fixed array collection
-	template<typename T> void set(array& value) {
+	void set(array& value) {
 		set(value.count);
 		set(value.size);
 		if(!writemode)
 			value.reserve(value.count);
 		set(value.ptr(0), value.getsize() * value.count);
-	}
-	// All simple types and requisites
-	template<class T> void set(T& value) {
-		set(&value, sizeof(value));
 	}
 };

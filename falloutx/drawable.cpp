@@ -47,3 +47,16 @@ void drawable::paint(int x, int y, unsigned flags) const {
 res_s drawable::getrid(item_s armor, gender_s gender) {
 	return (gender == Male) ? bsdata<itemi>::elements[armor].armor.male : bsdata<itemi>::elements[armor].armor.female;
 }
+
+void scenery::reanimate() {
+	auto ps = gres(SCENERY);
+	if(!ps)
+		return;
+	auto pt = m2h(loc.gethx(index), loc.gethy(index));
+	x = pt.x; y = pt.y;
+	rid = SCENERY;
+	auto pc = ps->gcicle(type);
+	frame = pc->start;
+	frame_start = frame;
+	frame_stop = frame;
+}

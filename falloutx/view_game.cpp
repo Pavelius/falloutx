@@ -11,6 +11,7 @@ static variant		hilite_object;
 static adat<drawable, 512> walls;
 static drawablea	objects;
 static indext		current_hexagon;
+static indext		current_tile;
 
 // Получение координаты тайла(x,y) на экране
 point draw::m2s(int x, int y) {
@@ -139,10 +140,17 @@ static void scrollmap(int x, int y, int cicle) {
 }
 
 static void prepare_objects() {
+	auto size = 160;
+	rect rc = {-size, -size, 640 + size, 480 + size};
+	rc.move(game.camera.x, game.camera.y);
 	objects.clear();
 	objects.select();
 	for(auto& e : walls)
 		objects.add(&e);
+	for(auto& e : bsdata<scenery>()) {
+		if(e && e.in(rc))
+			objects.add(&e);
+	}
 	objects.sortz();
 }
 
@@ -172,6 +180,7 @@ static void render_hexagon() {
 		return;
 	auto x = loc.gethx(current_hexagon);
 	auto y = loc.gethy(current_hexagon);
+	current_tile = loc.geti(x / 2, y / 2);
 	auto pt = m2h(x, y) - game.camera;
 	pt.x -= 31 / 2;
 	pt.y -= 15;
@@ -401,13 +410,15 @@ void gamei::combat() {
 	animate(608, 477, gres(INTRFACE), 104, 10, -2, -1);
 }
 
-static void render_status(int wall_Frame) {
+static void render_status() {
 	char temp[1024]; stringbuilder sb(temp);
 	auto pt = hot.mouse + game.camera;
-	sb.addn("Position %1i, %2i", pt.x, pt.y);
-	if(current_hexagon != Blocked)
-		sb.addn("Hex %1i, %2i (%3i)", loc.gethx(current_hexagon), loc.gethy(current_hexagon), current_hexagon);
-	sb.addn("Frame %1i", wall_Frame);
+	if(current_hexagon != Blocked) {
+		auto x = loc.gethx(current_hexagon);
+		auto y = loc.gethy(current_hexagon);
+		sb.addn("Hex %1i, %2i (%3i)", x, y, current_hexagon);
+		sb.addn("Tile %1i, %2i (%3i)", loc.getx(current_tile), loc.gety(current_tile), current_tile);
+	}
 	sb.addn("Objects %1i", objects.getcount());
 	auto push_fore = fore;
 	//setcolor(Color);
@@ -585,7 +596,7 @@ void areai::editor() {
 			cursor.set(None, 0);
 		set_current_hexagon();
 		render_map(true);
-		render_status(wall_frame);
+		render_status();
 		render_actions_editor();
 		domodal();
 		switch(hot.key) {
@@ -601,6 +612,8 @@ void areai::editor() {
 					loc.setwall(current_hexagon, 0);
 			}
 			break;
+		case KeyEnter: scenery::add(current_hexagon, scenery_frame);  break;
+		case KeySpace: loc.set(current_tile, tile_frame); break;
 		case 'S': scenery_frame = choose_scenery(scenery_frame); break;
 		case 'C': wall_frame = choose_wall(wall_frame); break;
 		case 'T': tile_frame = choose_tile(tile_frame); break;

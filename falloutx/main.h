@@ -691,6 +691,15 @@ struct tilei {
 	bool				is(short unsigned v) const;
 	int					random() const;
 };
+struct scenery : drawable {
+	indext				index;
+	short unsigned		type;
+	unsigned			flags;
+	constexpr explicit operator bool() const { return index != Blocked; }
+	static scenery*		add(indext index, short unsigned type);
+	static scenery*		find(indext index);
+	void				reanimate();
+};
 struct areai {
 	static const int	width = 128;
 	static const int	height = 128;

@@ -275,6 +275,9 @@
     <ClCompile Include="sprite_util.cpp">
       <Filter>Утилиты</Filter>
     </ClCompile>
+    <ClCompile Include="scenery.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\localization\ru\skill.txt">

@@ -127,8 +127,8 @@ enum direction_s : unsigned char {
 enum settlement_s : unsigned char {
 	SettlementArojo, SettlementDen, SettlementKlamath,
 };
-enum itemkind_s : unsigned char {
-	Weapon, Ammo, Armor, Drug, Misc,
+enum itemkind_s : unsigned char { // Order is important!
+	Armor, Container, Drug, Weapon, Ammo, Misc, Key
 };
 enum critical_effect_s : unsigned {
 	KnockOut = 0x10000000,
@@ -696,15 +696,17 @@ struct scenery : drawable {
 	short unsigned		type;
 	unsigned			flags;
 	constexpr explicit operator bool() const { return type != 0; }
-	static scenery*		add(indext index, short unsigned type);
+	static scenery*		add(indext index, draw::res_s rid, short unsigned type);
 	static scenery*		find(indext index);
 	void				reanimate();
 };
-struct areai {
-	static const int	width = 128;
-	static const int	height = 128;
-	unsigned short		tiles[width * height];
-	unsigned short		walls[width * height * 4];
+class areai {
+	unsigned short		floor[100 * 100];
+	unsigned short		roof[100 * 100];
+	unsigned short		walls[100 * 100 * 4];
+public:
+	static const int	width = 100;
+	static const int	height = 100;
 	void				clear();
 	void				editor();
 	static int			getx(indext i) { return i % width; }
@@ -713,11 +715,13 @@ struct areai {
 	static int			gethy(indext i) { return i / (width * 2); }
 	static indext		geti(int x, int y) { return y * width + x; }
 	static indext		geth(int x, int y) { return y * width * 2 + x; }
-	int					gettile(indext i) const { return tiles[i]; }
-	int					getwall(indext i) const { return walls[i]; }
+	unsigned short		getfloor(indext i) const { return floor[i]; }
+	unsigned short		getroof(indext i) const { return roof[i]; }
+	unsigned short		getwall(indext i) const { return walls[i]; }
 	bool				read(const char* url);
-	void				set(indext i, int v);
-	void				setwall(indext i, int v);
+	void				setroof(indext i, int v) { roof[i] = v; }
+	void				setfloor(indext i, int v) { floor[i] = v; }
+	void				setwall(indext i, int v) { walls[i] = v; }
 	void				set(indext i, int v, int w, int h);
 	void				set(indext i, const tilei& e, int w, int h);
 	bool				write(const char* url) const;

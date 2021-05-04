@@ -12,6 +12,8 @@ static adat<drawable, 512> walls;
 static drawablea	objects;
 static indext		current_hexagon;
 static indext		current_tile;
+static bool			show_roof = true;
+static bool			show_center = false;
 
 // Получение координаты тайла(x,y) на экране
 point draw::m2s(int x, int y) {
@@ -63,7 +65,55 @@ static void addpoint() {
 	p->y += hot.param2;
 }
 
-static void render_tiles() {
+static void render_floor() {
+	auto ps = gres(TILES);
+	if(!ps)
+		return;
+	auto tm = getuitime();
+	if(false) {
+		rect rc = {0 - tile_width, 0 - tile_height, 640 + tile_width, 480 + tile_height};
+		int xx = 4752 - game.camera.x;
+		int yy = tile_height / 2 - game.camera.y;
+		for(auto y = 0; y < 100; y++) {
+			auto prev_xx = xx;
+			auto prev_yy = yy;
+			for(auto x = 99; x >= 0; x--) {
+				point pt;
+				pt.x = xx;
+				pt.y = yy;
+				if(!pt.in(rc))
+					continue;
+				auto tv = loc.getfloor(loc.geti(x, y));
+				if(tv > 1)
+					draw::image(xx, yy, ps, ps->ganim(tv, tm), 0);
+				xx -= 48;
+				yy += 12;
+			}
+			xx = prev_xx + 32;
+			yy = prev_yy + 24;
+		}
+	} else {
+		auto pm = s2m(game.camera);
+		int x1 = pm.x - 8; int x2 = x1 + 19;
+		int y1 = pm.y - 1; int y2 = y1 + 20;
+		for(auto y = y1; y < y2; y++) {
+			if(y < 0 || y >= areai::height)
+				continue;
+			for(int x = x1; x < x2; x++) {
+				if(x < 0 || x >= areai::width)
+					continue;
+				auto tv = loc.getfloor(loc.geti(x, y));
+				if(tv > 1) {
+					point pt = m2s(x, y);
+					point pz = pt - game.camera;
+					draw::image(pz.x, pz.y + tile_height / 2, ps, ps->ganim(tv, tm), 0);
+				}
+			}
+		}
+	}
+}
+
+static void render_roof() {
 	auto ps = gres(TILES);
 	if(!ps)
 		return;
@@ -77,11 +127,11 @@ static void render_tiles() {
 		for(int x = x1; x < x2; x++) {
 			if(x < 0 || x >= areai::width)
 				continue;
-			auto tv = loc.gettile(loc.geti(x, y));
-			if(tv > 0) {
+			auto tv = loc.getroof(loc.geti(x, y));
+			if(tv > 1) {
 				point pt = m2s(x, y);
 				point pz = pt - game.camera;
-				draw::image(pz.x, pz.y + tile_height / 2, ps, ps->ganim(tv, tm), 0);
+				draw::image(pz.x, pz.y - 120 + tile_height / 2, ps, ps->ganim(tv, tm), 0);
 			}
 		}
 	}
@@ -166,8 +216,15 @@ static void update_objects() {
 }
 
 static void render_objects() {
-	for(auto p : objects)
-		p->paint(p->x - game.camera.x, p->y - game.camera.y, 0);
+	for(auto p : objects) {
+		auto x = p->x - game.camera.x;
+		auto y = p->y - game.camera.y;
+		p->paint(x, y, 0);
+		if(show_center) {
+			line(x - 4, y, x + 4, y, colors::red);
+			line(x, y - 4, x, y + 4, colors::red);
+		}
+	}
 }
 
 static void set_current_hexagon() {
@@ -187,7 +244,7 @@ static void render_hexagon() {
 	image(pt.x, pt.y, INTRFACE, 1);
 }
 
-void render_map(bool combat_mode) {
+void render_map() {
 	const int dx = 16;
 	const int dy = 12;
 	switch(hot.key) {
@@ -204,11 +261,13 @@ void render_map(bool combat_mode) {
 	scrollmap(0, 1, 275);
 	scrollmap(-1, 1, 276);
 	scrollmap(-1, 0, 277);
-	render_tiles();
-	render_hexagon();
+	render_floor();
 	prepare_walls();
 	prepare_objects();
 	render_objects();
+	if(show_roof)
+		render_roof();
+	render_hexagon();
 }
 
 static variant choose_target() {
@@ -386,7 +445,7 @@ static void render_actions(bool combat_mode = false) {
 void gamei::play() {
 	openform();
 	while(ismodal()) {
-		render_map(false);
+		render_map();
 		render_actions();
 		domodal();
 		update_objects();
@@ -402,7 +461,7 @@ void gamei::combat() {
 		rectf(rc, colors::gray);
 		if(ishilite(rc))
 			cursor.set(INTRFACE, 250);
-		render_map(true);
+		render_map();
 		render_actions(true);
 		domodal();
 	}
@@ -410,28 +469,13 @@ void gamei::combat() {
 	animate(608, 477, gres(INTRFACE), 104, 10, -2, -1);
 }
 
+void add_util_info(stringbuilder& sb, int mode, int value);
+
 static void render_actions_editor(int tile_frame, int wall_frame, int scenery_frame, int mode) {
 	auto ps = gres(INTRFACE);
 	if(!ps)
 		return;
 	auto x = 0, y = 480 - 99;
-	//image(x, y, ps, ps->ganim(16, 0), ImageNoOffset);
-	//if(buttonf(x + 210, y + 40, 47, 46, 'I', false)) {
-	//}
-	//if(buttonf(x + 210, y + 60, 18, 17, KeyEscape, false)) {
-	//}
-	//render_item(x + 265, y + 29, false);
-	//if(buttonf(x + 526, y + 38, 13, 10, 'M', false)) {
-	//}
-	//if(buttonf(x + 526, y + 58, 57, 56, 'C', false)) {
-	//}
-	//if(buttonf(x + 526, y + 78, 59, 58, 'P', false)) {
-	//}
-	//if(buttonf(x + 218, y + 6, 6, 7, 'W', false)) {
-	//}
-	//if(buttonf(x + 523, y + 6, 6, 7, 'S', false)) {
-	//}
-	//consoleview(x + 26, y + 32);
 	const auto dy = 99;
 	rect rc = {0, 480 - dy, 160, 479};
 	rectf(rc, colors::gray);
@@ -445,6 +489,17 @@ static void render_actions_editor(int tile_frame, int wall_frame, int scenery_fr
 		sb.addn("Tile %1i, %2i (%3i)", loc.getx(current_tile), loc.gety(current_tile), current_tile);
 	}
 	sb.addn("Objects %1i", objects.getcount());
+	switch(mode) {
+	case 0:
+		add_util_info(sb, mode, tile_frame);
+		break;
+	case 1:
+		add_util_info(sb, mode, scenery_frame);
+		break;
+	case 2:
+		add_util_info(sb, mode, wall_frame);
+		break;
+	}
 	auto push_fore = fore;
 	setcolor(ColorInfo);
 	textf(rc.x1 + 4, rc.y1 + 4, rc.width(), temp);
@@ -464,6 +519,7 @@ static short unsigned choose_wall(short unsigned start, int& mode) {
 	const int dy = 140;
 	const int my = 3;
 	int current = start;
+	char temp[260]; stringbuilder sb(temp);
 	while(ismodal()) {
 		rectf({0, 0, 640, 480}, colors::gray);
 		auto x = 20, y = dy;
@@ -480,9 +536,11 @@ static short unsigned choose_wall(short unsigned start, int& mode) {
 		auto index = origin;
 		while(y <= dy * my) {
 			for(auto x = 16; x < dx * mx; x += 40) {
-				image(x, y, ps, ps->ganim(index, 0), 0);
+				image(x, y, ps, ps->ganim(index, getuitime() / 100), 0);
 				if(current == index)
 					rectb({x - dx / 2, y - dy + 16, x + dx / 2, y + 16}, colors::red);
+				sb.clear(); sb.add("%1i", index);
+				text(x - textw(temp) / 2, y, temp);
 				index++;
 			}
 			y += dy;
@@ -593,13 +651,13 @@ static void apply_frame(int mode, int tile_frame, int scenery_frame, int wall_fr
 	switch(mode) {
 	case 0:
 		if(current_tile != Blocked)
-			loc.set(current_tile, tile_frame);
+			loc.setfloor(current_tile, tile_frame);
 		break;
 	case 1:
 		if(current_hexagon != Blocked)
-			scenery::add(current_hexagon, scenery_frame);
+			scenery::add(current_hexagon, SCENERY, scenery_frame);
 		break;
-	case 2: 
+	case 2:
 		if(current_hexagon != Blocked)
 			loc.setwall(current_hexagon, wall_frame);
 		break;
@@ -615,7 +673,7 @@ void areai::editor() {
 		if(cursor_on_map)
 			cursor.set(None, 0);
 		set_current_hexagon();
-		render_map(true);
+		render_map();
 		render_actions_editor(tile_frame, wall_frame, scenery_frame, mode);
 		domodal();
 		switch(hot.key) {
@@ -629,6 +687,8 @@ void areai::editor() {
 		case KeySpace:
 			apply_frame(mode, tile_frame, scenery_frame, wall_frame);
 			break;
+		case 'G': show_center = !show_center; break;
+		case 'R': show_roof = !show_roof; break;
 		case 'T': tile_frame = choose_tile(tile_frame, mode); break;
 		case 'S': scenery_frame = choose_scenery(scenery_frame, mode); break;
 		case 'W': wall_frame = choose_wall(wall_frame, mode); break;

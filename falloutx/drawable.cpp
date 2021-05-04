@@ -49,12 +49,11 @@ res_s drawable::getrid(item_s armor, gender_s gender) {
 }
 
 void scenery::reanimate() {
-	auto ps = gres(SCENERY);
+	auto ps = gres(rid);
 	if(!ps)
 		return;
 	auto pt = m2h(loc.gethx(index), loc.gethy(index));
 	x = pt.x; y = pt.y;
-	rid = SCENERY;
 	auto pc = ps->gcicle(type);
 	frame = pc->start;
 	frame_start = frame;

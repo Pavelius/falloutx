@@ -263,13 +263,13 @@
     <ClCompile Include="main_util.cpp">
       <Filter>Утилиты</Filter>
     </ClCompile>
-    <ClCompile Include="pro_item_en_util.cpp">
+    <ClCompile Include="msg_item_en_util.cpp">
       <Filter>Утилиты</Filter>
     </ClCompile>
     <ClCompile Include="pro_item_util.cpp">
       <Filter>Утилиты</Filter>
     </ClCompile>
-    <ClCompile Include="pro_misc_util.cpp">
+    <ClCompile Include="msg_misc_util.cpp">
       <Filter>Утилиты</Filter>
     </ClCompile>
     <ClCompile Include="sprite_util.cpp">
@@ -277,6 +277,12 @@
     </ClCompile>
     <ClCompile Include="scenery.cpp">
       <Filter>Логика</Filter>
+    </ClCompile>
+    <ClCompile Include="pro_criters_util.cpp">
+      <Filter>Утилиты</Filter>
+    </ClCompile>
+    <ClCompile Include="pro_scenery_util.cpp">
+      <Filter>Утилиты</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -44,7 +44,7 @@ static void test_adventure() {
 	game.setcamera({1000, 100});
 	if(!loc.read("test")) {
 		loc.clear();
-		loc.set(loc.geti(0, 0), bsdata<tilei>::elements[2], loc.width, loc.height);
+		loc.set(loc.geti(0, 0), bsdata<tilei>::elements[2], 128, 128);
 	}
 	auto opponent = bsdata<creaturei>::add();
 	opponent->create(Narg);
@@ -64,7 +64,7 @@ static void test_adventure() {
 
 static void test_game() {
 	game.setcamera({1000, 100});
-	if(!loc.read("test")) {
+	if(!loc.read("test1")) {
 		loc.clear();
 		loc.set(loc.geti(0, 0), bsdata<tilei>::elements[2], loc.width, loc.height);
 	}

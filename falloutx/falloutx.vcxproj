@@ -188,6 +188,7 @@
     <ClCompile Include="pro_item_util.cpp" />
     <ClCompile Include="msg_misc_util.cpp" />
     <ClCompile Include="pro_scenery_util.cpp" />
+    <ClCompile Include="pro_tile_util.cpp" />
     <ClCompile Include="scenery.cpp" />
     <ClCompile Include="sprite_util.cpp" />
     <ClCompile Include="tile.cpp" />

@@ -4,6 +4,7 @@
 using namespace draw;
 
 void main_util();
+void test_tile();
 
 static void load_game() {
 	openform();
@@ -63,8 +64,9 @@ static void test_adventure() {
 }
 
 static void test_game() {
+	//test_tile();
 	game.setcamera({1000, 100});
-	if(!loc.read("test1")) {
+	if(!loc.read("test")) {
 		loc.clear();
 		loc.set(loc.geti(0, 0), bsdata<tilei>::elements[2], loc.width, loc.height);
 	}
@@ -73,7 +75,6 @@ static void test_game() {
 
 void test_walls();
 void test_animate();
-void test_tiles();
 
 void gamei::mainmenu() {
 	openform();
@@ -84,7 +85,7 @@ void gamei::mainmenu() {
 		setfont(FONT4);
 		post(0, game.newgame, buttong(x, y, 100, "История", 'H')); y += 41;
 		post(0, test_walls, buttong(x, y, 100, "Загрузить", 'L')); y += 41;
-		post(0, test_tiles, buttong(x, y, 100, "Тайлы", 'T')); y += 41;
+		post(0, test_tile, buttong(x, y, 100, "Тайлы", 'T')); y += 41;
 		post(0, test_animate, buttong(x, y, 100, "Анимация", 'A')); y += 41;
 		post(0, game.worldmap, buttong(x, y, 100, "Мир", 'W')); y += 41;
 		post(0, test_game, buttong(x, y, 100, "Игра", 'G')); y += 41;

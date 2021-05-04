@@ -284,6 +284,9 @@
     <ClCompile Include="pro_scenery_util.cpp">
       <Filter>Утилиты</Filter>
     </ClCompile>
+    <ClCompile Include="pro_tile_util.cpp">
+      <Filter>Утилиты</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\localization\ru\skill.txt">

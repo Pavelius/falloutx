@@ -2,6 +2,12 @@
 
 areai loc;
 
+indext areai::geth(int x, int y) {
+	if((unsigned)x >= width * 2 || (unsigned)y >= height * 2)
+		return Blocked;
+	return y * width * 2 + x;
+}
+
 void areai::clear() {
 	memset(this, 0, sizeof(0));
 	bsdata<scenery>::source.clear();

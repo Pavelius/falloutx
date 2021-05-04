@@ -714,7 +714,7 @@ public:
 	static int			gethx(indext i) { return i % (width * 2); }
 	static int			gethy(indext i) { return i / (width * 2); }
 	static indext		geti(int x, int y) { return y * width + x; }
-	static indext		geth(int x, int y) { return y * width * 2 + x; }
+	static indext		geth(int x, int y);
 	unsigned short		getfloor(indext i) const { return floor[i]; }
 	unsigned short		getroof(indext i) const { return roof[i]; }
 	unsigned short		getwall(indext i) const { return walls[i]; }

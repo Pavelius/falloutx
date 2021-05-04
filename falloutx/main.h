@@ -691,24 +691,30 @@ struct tilei {
 	bool				is(short unsigned v) const;
 	int					random() const;
 };
-struct scenery : drawable {
+//struct scenery : drawable {
+//	indext				index;
+//	short unsigned		type;
+//	unsigned			flags;
+//	constexpr explicit operator bool() const { return type != 0; }
+//	static scenery*		add(indext index, draw::res_s rid, short unsigned type);
+//	static scenery*		find(indext index);
+//};
+struct mapobject : drawable {
 	indext				index;
 	short unsigned		type;
-	unsigned			flags;
-	constexpr explicit operator bool() const { return type != 0; }
-	static scenery*		add(indext index, draw::res_s rid, short unsigned type);
-	static scenery*		find(indext index);
+	explicit			operator bool() const { return type!=0; }
 	void				reanimate();
 };
 class areai {
 	unsigned short		floor[100 * 100];
 	unsigned short		roof[100 * 100];
-	unsigned short		walls[100 * 100 * 4];
 public:
 	static const int	width = 100;
 	static const int	height = 100;
 	void				clear();
 	void				editor();
+	static mapobject*	add(indext index, draw::res_s rid, short unsigned type);
+	static mapobject*	find(indext index);
 	static int			getx(indext i) { return i % width; }
 	static int			gety(indext i) { return i / width; }
 	static int			gethx(indext i) { return i % (width * 2); }
@@ -717,11 +723,9 @@ public:
 	static indext		geth(int x, int y);
 	unsigned short		getfloor(indext i) const { return floor[i]; }
 	unsigned short		getroof(indext i) const { return roof[i]; }
-	unsigned short		getwall(indext i) const { return walls[i]; }
 	bool				read(const char* url);
 	void				setroof(indext i, int v) { roof[i] = v; }
 	void				setfloor(indext i, int v) { floor[i] = v; }
-	void				setwall(indext i, int v) { walls[i] = v; }
 	void				set(indext i, int v, int w, int h);
 	void				set(indext i, const tilei& e, int w, int h);
 	bool				write(const char* url) const;
@@ -757,7 +761,7 @@ variant					getfocus();
 sprite*					gres(res_s id);
 const char*				getname(res_s id);
 unsigned				getuitime();
-point					h2m(point pt);
+point					h2s(point v);
 void					image(int x, int y, res_s id, int cicle, int flags = 0, unsigned char alpha = 0xFF);
 bool					isactionmode();
 bool					isdefaultinput();
@@ -766,8 +770,7 @@ bool					istips(unsigned t = 1000); // Return true if tips needs to be shown
 bool					istipsonetime();
 bool					label(int x, int& y, int width, const char* format, unsigned key, bool bullet = false);
 void					listinput(int& current, int& origin, int perpage, int perline, unsigned maximum);
-point					m2s(int x, int y);
-point					m2h(int x, int y);
+point					t2s(point v);
 void					message(const char* string, ...);
 void					messagev(const char* string, bool focused = false);
 void					monthname(int x, int y, int value);
@@ -778,7 +781,8 @@ void					post(void* p, fnevent ev, bool run);
 void					openform();
 bool					radio(int x, int y, int cicle, unsigned key);
 void					runstage();
-point					s2m(point s); // Convert screen coordinates to tile index
+point					s2h(point v);
+point					s2t(point v); // Convert screen coordinates to tile index
 void					scrollup(const rect& rc, int& origin, int maximum);
 void					scrollup(const rect& rc, int& origin, int& maximum, const char* format);
 void					setactionmode(bool active);

@@ -8,7 +8,6 @@ const int			stx = tile_width / 5; // 16 - Ширина юнита тайла. Каждый тайл имеет 
 const int			sty = tile_height / 3; // 12 - Высота юнита тайла. Каждый тайл имеет размер в 5х3 юнита.
 
 static variant		hilite_object;
-static adat<drawable, 512> walls;
 static drawablea	objects;
 static indext		current_hexagon;
 static indext		current_tile;
@@ -16,47 +15,75 @@ static bool			show_roof = true;
 static bool			show_center = false;
 
 // Получение координаты тайла(x,y) на экране
-point draw::m2s(int x, int y) {
-	return{(short)(2 * stx * y + 3 * stx * x), (short)(2 * sty * y - sty * x)};
+point draw::t2s(point v) {
+	return {
+		(short)(32 * v.y + 48 * v.x),
+		(short)(24 * v.y - 12 * v.x)
+	};
 }
 
-// Определение индекса тайла по координатам(x,y) на экране
-point draw::s2m(point pt) {
-	int x = pt.x + tile_width / 2 - 2;
-	int y = pt.y + tile_height / 4 - 2;
+// Определение координаты тайла по координатам(x,y) на экране
+point draw::s2t(point pt) {
+	int x = pt.x + 40;
+	int y = pt.y + 26;
 	return{(short)((x - 4 * y / 3) / 64), (short)((x + 4 * y) / 128)};
 }
 
 // Получение координаты хексагона(x,y) на экране
-point draw::m2h(int x, int y) {
-	int x1 = stx * (y + x + x / 2) - stx / 2;
-	int y1 = sty * (y - x + x / 2) - sty / 2;
-	return{(short)x1, (short)y1};
+point draw::h2s(point v) {
+	return{
+		(short)(16 * (v.y + v.x * 2 - v.x / 2)),
+		(short)(12 * (v.y - v.x / 2))
+	};
+	//return{
+	//	(short)(stx * (y + x + x / 2) - stx / 2),
+	//	(short)(sty * (y - x + x / 2) - sty / 2)
+	//};
 }
 
-point draw::h2m(point pt) {
-	int x1 = pt.x + stx / 2;
-	int y1 = pt.y;
-	int x0 = 4800;
+// Определение координаты хексагона
+point draw::s2h(point pt) {
+	int x1 = pt.x + 15;
+	int y1 = pt.y + 7;
 	int nx;
-	if(x1 - x0 < 0)
-		nx = (x1 - x0 + 1) / stx - 1;
+	if(x1 < 0)
+		nx = (x1 + 1) / 16 - 1;
 	else
-		nx = (x1 - x0) / stx;
+		nx = x1 / 16;
 	int ny;
 	if(y1 < 0)
-		ny = (y1 + 1) / sty - 1;
+		ny = (y1 + 1) / 12 - 1;
 	else
-		ny = y1 / sty;
+		ny = y1 / 12;
 	if(iabs(nx) % 2 != iabs(ny) % 2)
 		nx--;
-	long xhBase = x0 + stx * nx;
-	long yhBase = sty * ny;
-	int x = (4 * yhBase - 3 * (xhBase - x0)) / 96;
+	long xhBase = 16 * nx;
+	long yhBase = 12 * ny;
+	int x = (4 * yhBase - 3 * xhBase) / 96;
 	int y = yhBase / 12 - x / 2;
-	x = 150 - x;
-	y = y + 76;
-	return{(short)x, (short)y};
+	return{(short)-x, (short)y};
+	//int x1 = pt.x + stx / 2;
+	//int y1 = pt.y;
+	//int x0 = 4800;
+	//int nx;
+	//if(x1 - x0 < 0)
+	//	nx = (x1 - x0 + 1) / stx - 1;
+	//else
+	//	nx = (x1 - x0) / stx;
+	//int ny;
+	//if(y1 < 0)
+	//	ny = (y1 + 1) / sty - 1;
+	//else
+	//	ny = y1 / sty;
+	//if(iabs(nx) % 2 != iabs(ny) % 2)
+	//	nx--;
+	//long xhBase = x0 + stx * nx;
+	//long yhBase = sty * ny;
+	//int x = (4 * yhBase - 3 * (xhBase - x0)) / 96;
+	//int y = yhBase / 12 - x / 2;
+	//x = 150 - x;
+	//y = y + 76;
+	//return{(short)x, (short)y};
 }
 
 static void addpoint() {
@@ -65,14 +92,14 @@ static void addpoint() {
 	p->y += hot.param2;
 }
 
-static void render_floor() {
+static void redraw_floor() {
 	auto ps = gres(TILES);
 	if(!ps)
 		return;
 	auto tm = getuitime();
 	rect rc = {-tile_width, -tile_height, 640 + tile_width, 480 + tile_height};
-	int xx = -game.camera.x;
-	int yy = tile_height / 2 - game.camera.y;
+	int xx = 8 - game.camera.x;
+	int yy = 26 - game.camera.y;
 	for(auto y = 0; y < 100; y++) {
 		auto prev_xx = xx;
 		auto prev_yy = yy;
@@ -91,51 +118,29 @@ static void render_floor() {
 	}
 }
 
-static void render_roof() {
+static void redraw_roof() {
 	auto ps = gres(TILES);
 	if(!ps)
 		return;
 	auto tm = getuitime();
-	auto pm = s2m(game.camera);
-	int x1 = pm.x - 8; int x2 = x1 + 19;
-	int y1 = pm.y - 1; int y2 = y1 + 20;
-	for(auto y = y1; y < y2; y++) {
-		if(y < 0 || y >= areai::height)
-			continue;
-		for(int x = x1; x < x2; x++) {
-			if(x < 0 || x >= areai::width)
-				continue;
-			auto tv = loc.getroof(loc.geti(x, y));
-			if(tv > 1) {
-				point pt = m2s(x, y);
-				point pz = pt - game.camera;
-				draw::image(pz.x, pz.y - 120 + tile_height / 2, ps, ps->ganim(tv, tm), 0);
+	rect rc = {-tile_width, -tile_height, 640 + tile_width, 480 + tile_height};
+	int xx = 8 - game.camera.x;
+	int yy = 26 - game.camera.y - 96;
+	for(auto y = 0; y < 100; y++) {
+		auto prev_xx = xx;
+		auto prev_yy = yy;
+		for(auto x = 0; x < 100; x++) {
+			point pt = {(short)xx, (short)yy};
+			if(pt.in(rc)) {
+				auto tv = loc.getroof(loc.geti(x, y));
+				if(tv > 1)
+					draw::image(xx, yy, ps, ps->ganim(tv, tm), 0);
 			}
+			xx += 48;
+			yy -= 12;
 		}
-	}
-}
-
-static void prepare_walls() {
-	walls.clear();
-	auto pm = h2m(game.camera);
-	int x1 = pm.x - 24; int x2 = x1 + 48;
-	int y1 = pm.y - 4; int y2 = y1 + 48;
-	for(auto y = y1; y < y2; y++) {
-		if(y < 0 || y >= areai::height * 2)
-			continue;
-		for(int x = x1; x < x2; x++) {
-			if(x < 0 || x >= areai::width * 2)
-				continue;
-			auto hi = loc.geth(x, y);
-			auto tv = loc.getwall(hi);
-			if(tv > 0) {
-				auto p = walls.add();
-				p->set(WALLS, tv);
-				point pt = m2h(x, y);
-				p->x = pt.x;
-				p->y = pt.y;
-			}
-		}
+		xx = prev_xx + 32;
+		yy = prev_yy + 24;
 	}
 }
 
@@ -173,9 +178,7 @@ static void prepare_objects() {
 	rc.move(game.camera.x, game.camera.y);
 	objects.clear();
 	objects.select();
-	for(auto& e : walls)
-		objects.add(&e);
-	for(auto& e : bsdata<scenery>()) {
+	for(auto& e : bsdata<mapobject>()) {
 		if(e && e.in(rc))
 			objects.add(&e);
 	}
@@ -193,7 +196,7 @@ static void update_objects() {
 	}
 }
 
-static void render_objects() {
+static void redraw_objects() {
 	for(auto p : objects) {
 		auto x = p->x - game.camera.x;
 		auto y = p->y - game.camera.y;
@@ -205,24 +208,22 @@ static void render_objects() {
 	}
 }
 
-static void set_current_hexagon() {
-	auto pt = h2m(hot.mouse + game.camera);
+void set_current_hexagon() {
+	auto pt = s2h(hot.mouse + game.camera);
 	current_hexagon = loc.geth(pt.x, pt.y);
 }
 
-static void render_hexagon() {
+static void redraw_hexagon() {
 	if(current_hexagon == Blocked)
 		return;
 	auto x = loc.gethx(current_hexagon);
 	auto y = loc.gethy(current_hexagon);
 	current_tile = loc.geti(x / 2, y / 2);
-	auto pt = m2h(x, y) - game.camera;
-	pt.x -= 31 / 2;
-	pt.y -= 15;
-	image(pt.x, pt.y, INTRFACE, 1);
+	auto pt = h2s({(short)x, (short)y}) - game.camera;
+	image(pt.x - 15, pt.y - 11, INTRFACE, 1);
 }
 
-void render_map() {
+void redraw_map() {
 	const int dx = 16;
 	const int dy = 12;
 	switch(hot.key) {
@@ -239,13 +240,12 @@ void render_map() {
 	scrollmap(0, 1, 275);
 	scrollmap(-1, 1, 276);
 	scrollmap(-1, 0, 277);
-	render_floor();
-	prepare_walls();
+	redraw_floor();
 	prepare_objects();
-	render_objects();
-	//if(show_roof)
-	//	render_roof();
-	render_hexagon();
+	redraw_objects();
+	if(show_roof)
+		redraw_roof();
+	redraw_hexagon();
 }
 
 static variant choose_target() {
@@ -423,7 +423,7 @@ static void render_actions(bool combat_mode = false) {
 void gamei::play() {
 	openform();
 	while(ismodal()) {
-		render_map();
+		redraw_map();
 		render_actions();
 		domodal();
 		update_objects();
@@ -439,7 +439,7 @@ void gamei::combat() {
 		rectf(rc, colors::gray);
 		if(ishilite(rc))
 			cursor.set(INTRFACE, 250);
-		render_map();
+		redraw_map();
 		render_actions(true);
 		domodal();
 	}
@@ -476,55 +476,7 @@ static void render_actions_editor(int tile_frame, int wall_frame, int scenery_fr
 	//fore = push_fore;
 }
 
-static short unsigned choose_wall(short unsigned start, int& mode) {
-	openform();
-	int wall_frame = 24;
-	auto ps = gres(WALLS);
-	auto origin = 0;
-	const int dx = 40;
-	const int mx = 16;
-	const int dy = 140;
-	const int my = 3;
-	int current = start;
-	char temp[260]; stringbuilder sb(temp);
-	while(ismodal()) {
-		rectf({0, 0, 640, 480}, colors::gray);
-		auto x = 20, y = dy;
-		if(current < 0)
-			current = 0;
-		if(current > (int)ps->cicles - 1)
-			current = ps->cicles - 1;
-		if(current < origin)
-			origin = (current / mx) * mx;
-		if(current >= origin + my * mx)
-			origin = (current / mx) * mx - (my - 1) * mx;
-		if(origin < 0)
-			origin = 0;
-		auto index = origin;
-		while(y <= dy * my) {
-			for(auto x = 16; x < dx * mx; x += 40) {
-				image(x, y, ps, ps->ganim(index, getuitime() / 100), 0);
-				if(current == index)
-					rectb({x - dx / 2, y - dy + 16, x + dx / 2, y + 16}, colors::red);
-				sb.clear(); sb.add("%1i", index);
-				text(x - textw(temp) / 2, y, temp);
-				index++;
-			}
-			y += dy;
-		}
-		domodal();
-		switch(hot.key) {
-		case KeyEnter: mode = 2; breakmodal(current); break;
-		case KeyEscape: breakmodal(start); break;
-		case KeyLeft: current--; break;
-		case KeyRight: current++; break;
-		case KeyUp: current -= mx; break;
-		case KeyDown: current += mx; break;
-		}
-	}
-	closeform();
-	return getresult();
-}
+short unsigned choose_wall(short unsigned start, int& mode);
 
 static short unsigned choose_tile(short unsigned start, int& mode) {
 	openform();
@@ -578,11 +530,11 @@ static void apply_frame(int mode, int tile_frame, int scenery_frame, int wall_fr
 		break;
 	case 1:
 		if(current_hexagon != Blocked)
-			scenery::add(current_hexagon, SCENERY, scenery_frame);
+			loc.add(current_hexagon, SCENERY, scenery_frame);
 		break;
 	case 2:
 		if(current_hexagon != Blocked)
-			loc.setwall(current_hexagon, wall_frame);
+			loc.add(current_hexagon, WALLS, wall_frame);
 		break;
 	}
 }
@@ -640,7 +592,7 @@ void areai::editor() {
 		auto cursor_on_map = hot.mouse.in({0, 0, 640, 480 - 99});
 		if(cursor_on_map && current_hexagon != Blocked)
 			cursor.set(None, 0);
-		render_map();
+		redraw_map();
 		render_actions_editor(tile_frame, wall_frame, scenery_frame, mode);
 		domodal();
 		switch(hot.key) {

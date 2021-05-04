@@ -275,9 +275,6 @@
     <ClCompile Include="sprite_util.cpp">
       <Filter>Утилиты</Filter>
     </ClCompile>
-    <ClCompile Include="scenery.cpp">
-      <Filter>Логика</Filter>
-    </ClCompile>
     <ClCompile Include="pro_criters_util.cpp">
       <Filter>Утилиты</Filter>
     </ClCompile>
@@ -285,6 +282,9 @@
       <Filter>Утилиты</Filter>
     </ClCompile>
     <ClCompile Include="pro_tile_util.cpp">
+      <Filter>Утилиты</Filter>
+    </ClCompile>
+    <ClCompile Include="pro_wall_util.cpp">
       <Filter>Утилиты</Filter>
     </ClCompile>
   </ItemGroup>

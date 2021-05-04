@@ -65,7 +65,7 @@ static bool serial(areai& e, const char* name, bool write_mode) {
 	if(!ar.signature("MAP"))
 		return false;
 	ar.set(e);
-	ar.set(bsdata<scenery>::source);
+	ar.set(bsdata<mapobject>::source);
 	return true;
 }
 

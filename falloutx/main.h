@@ -187,7 +187,7 @@ enum color_s : unsigned char {
 	ColorState = 0x90
 };
 enum tile_s : unsigned char {
-	TileDirt, TileStep, TileCave, TileRock, TileBorder, TilePlates,
+	TileDirt, TileStep, TileCave, TileRock, TileBorder, TilePlates, TileAcid
 };
 enum command_s {
 	Cancel, Next, Back, Options, Save, Load, Delete, Print, Quit,
@@ -314,7 +314,9 @@ struct drawable : public point {
 	unsigned short		frame, frame_start, frame_stop;
 	unsigned			next_stamp;
 	void				add(point v) { x += v.x; y += v.y; }
+	bool				getrect(rect& result, point camera);
 	static draw::res_s	getrid(item_s armor, gender_s gender);
+	bool				hittest(point mouse) const;
 	void				paint() const { paint(x, y, 0); }
 	void				paint(int x, int y, unsigned flags = 0) const;
 	void				set(draw::res_s v, int cicle);
@@ -688,17 +690,11 @@ struct tilei {
 	tilea				up, right, down, left;
 	short unsigned		sides[4];
 	short unsigned		corners[4];
+	short unsigned		correct(short unsigned t, unsigned char c);
+	static tilei*		find(short unsigned t);
 	bool				is(short unsigned v) const;
 	int					random() const;
 };
-//struct scenery : drawable {
-//	indext				index;
-//	short unsigned		type;
-//	unsigned			flags;
-//	constexpr explicit operator bool() const { return type != 0; }
-//	static scenery*		add(indext index, draw::res_s rid, short unsigned type);
-//	static scenery*		find(indext index);
-//};
 struct mapobject : drawable {
 	indext				index;
 	short unsigned		type;
@@ -712,6 +708,8 @@ public:
 	static const int	width = 100;
 	static const int	height = 100;
 	void				clear();
+	void				correct();
+	void				correct(indext t);
 	void				editor();
 	static mapobject*	add(indext index, draw::res_s rid, short unsigned type);
 	static mapobject*	find(indext index);
@@ -728,6 +726,7 @@ public:
 	void				setfloor(indext i, int v) { floor[i] = v; }
 	void				set(indext i, int v, int w, int h);
 	void				set(indext i, const tilei& e, int w, int h);
+	static indext		tot(indext i, direction_s d);
 	bool				write(const char* url) const;
 };
 extern areai loc;
@@ -770,6 +769,7 @@ bool					istips(unsigned t = 1000); // Return true if tips needs to be shown
 bool					istipsonetime();
 bool					label(int x, int& y, int width, const char* format, unsigned key, bool bullet = false);
 void					listinput(int& current, int& origin, int perpage, int perline, unsigned maximum);
+void					marker(int x, int y);
 point					t2s(point v);
 void					message(const char* string, ...);
 void					messagev(const char* string, bool focused = false);

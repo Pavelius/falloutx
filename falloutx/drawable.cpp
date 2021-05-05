@@ -59,3 +59,15 @@ void mapobject::reanimate() {
 	frame_start = frame;
 	frame_stop = frame;
 }
+
+bool drawable::hittest(point mouse) const {
+	return draw::hittest(mouse, x, y, gres(rid), frame, 0);
+}
+
+bool drawable::getrect(rect& result, point camera) {
+	auto ps = gres(rid);
+	if(!ps)
+		return false;
+	ps->get(frame).getrect(result, x - camera.x, y - camera.y, 0);
+	return true;
+}

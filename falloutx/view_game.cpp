@@ -7,7 +7,7 @@ using namespace draw;
 const int			stx = tile_width / 5; // 16 - Ширина юнита тайла. Каждый тайл имеет размер в 5х3 юнита.
 const int			sty = tile_height / 3; // 12 - Высота юнита тайла. Каждый тайл имеет размер в 5х3 юнита.
 
-static variant		hilite_object;
+static drawable*	hilite_object;
 static drawablea	objects;
 static indext		current_hexagon;
 static indext		current_tile;
@@ -197,14 +197,16 @@ static void update_objects() {
 }
 
 static void redraw_objects() {
+	hilite_object = 0;
+	auto mouse = hot.mouse + game.camera;
 	for(auto p : objects) {
 		auto x = p->x - game.camera.x;
 		auto y = p->y - game.camera.y;
 		p->paint(x, y, 0);
-		if(show_center) {
-			line(x - 4, y, x + 4, y, colors::red);
-			line(x, y - 4, x, y + 4, colors::red);
-		}
+		if(show_center)
+			marker(x, y);
+		if(p->hittest(mouse))
+			hilite_object = p;
 	}
 }
 
@@ -220,10 +222,19 @@ static void redraw_hexagon() {
 	auto y = loc.gethy(current_hexagon);
 	current_tile = loc.geti(x / 2, y / 2);
 	auto pt = h2s({(short)x, (short)y}) - game.camera;
-	image(pt.x - 15, pt.y - 11, INTRFACE, 1);
+	image(pt.x - 15, pt.y - 10, INTRFACE, 1);
 }
 
-void redraw_map() {
+static void control_map(bool mouse_events) {
+	rect rc = {0, 0, 640, 480 - 99};
+	if(mouse_events && hot.mouse.in(rc)) {
+		switch(hot.key) {
+		case MouseRight:
+			if(hot.pressed && !isactionmode())
+				setactionmode(true);
+			break;
+		}
+	}
 	const int dx = 16;
 	const int dy = 12;
 	switch(hot.key) {
@@ -240,15 +251,19 @@ void redraw_map() {
 	scrollmap(0, 1, 275);
 	scrollmap(-1, 1, 276);
 	scrollmap(-1, 0, 277);
+}
+
+static void redraw_map(bool mouse_events) {
 	redraw_floor();
 	prepare_objects();
 	redraw_objects();
 	if(show_roof)
 		redraw_roof();
 	redraw_hexagon();
+	control_map(mouse_events);
 }
 
-static variant choose_target() {
+static drawable* choose_target() {
 	openform();
 	screenshoot screen;
 	while(ismodal()) {
@@ -259,7 +274,7 @@ static variant choose_target() {
 		case MouseLeft:
 		case MouseLeftDBL:
 			if(hot.pressed)
-				breakmodal(hilite_object);
+				breakmodal((int)hilite_object);
 			break;
 		case MouseRight:
 			breakmodal(0);
@@ -272,7 +287,7 @@ static variant choose_target() {
 		}
 	}
 	closeform();
-	return getresult();
+	return (drawable*)getresult();
 }
 
 static void use_item() {
@@ -336,7 +351,7 @@ static void horizontal(int& x, int y, int d, sprite* ps, int frame, int count) {
 	}
 }
 
-static void render_ap(int x, int y, int green, int red, int yellow) {
+static void redraw_ap(int x, int y, int green, int red, int yellow) {
 	auto ps = gres(INTRFACE);
 	if(!ps)
 		return;
@@ -346,7 +361,7 @@ static void render_ap(int x, int y, int green, int red, int yellow) {
 	horizontal(x, y, w, ps, ps->ganim(84, 0), red);
 }
 
-static void render_item(int x, int y, bool combat_mode) {
+static void redraw_item(int x, int y, bool combat_mode) {
 	auto ps = gres(INTRFACE);
 	if(!ps)
 		return;
@@ -382,7 +397,7 @@ static void render_item(int x, int y, bool combat_mode) {
 	}
 }
 
-static void render_actions(bool combat_mode = false) {
+static void redraw_actions(bool combat_mode = false) {
 	auto ps = gres(INTRFACE);
 	if(!ps)
 		return;
@@ -394,7 +409,7 @@ static void render_actions(bool combat_mode = false) {
 		execute(open_inventory);
 	if(buttonf(x + 210, y + 60, 18, 17, KeyEscape, false))
 		execute(open_options);
-	render_item(x + 265, y + 29, combat_mode);
+	redraw_item(x + 265, y + 29, combat_mode);
 	if(buttonf(x + 526, y + 38, 13, 10, 'M', false))
 		execute(open_map);
 	if(buttonf(x + 526, y + 58, 57, 56, 'C', false))
@@ -408,7 +423,7 @@ static void render_actions(bool combat_mode = false) {
 	numbersm(x + 472, y + 39, 4, game.getplayer().get(HP), 0);
 	numbersm(x + 472, y + 76, 4, game.getplayer().get(AC), 1);
 	if(combat_mode) {
-		render_ap(x + 317, y + 19, 8, 0, 1);
+		redraw_ap(x + 317, y + 19, 8, 0, 1);
 		auto pc = ps->gcicle(104);
 		image(608, 477, ps, ps->ganim(104, pc->count - 1), 0);
 		image(608, 477, ps, ps->ganim(109, 0), 0);
@@ -423,8 +438,8 @@ static void render_actions(bool combat_mode = false) {
 void gamei::play() {
 	openform();
 	while(ismodal()) {
-		redraw_map();
-		render_actions();
+		redraw_map(true);
+		redraw_actions();
 		domodal();
 		update_objects();
 	}
@@ -439,8 +454,8 @@ void gamei::combat() {
 		rectf(rc, colors::gray);
 		if(ishilite(rc))
 			cursor.set(INTRFACE, 250);
-		redraw_map();
-		render_actions(true);
+		redraw_map(false);
+		redraw_actions(true);
 		domodal();
 	}
 	closeform();
@@ -449,7 +464,7 @@ void gamei::combat() {
 
 void add_util_info(stringbuilder& sb, int mode, int value);
 
-static void render_actions_editor(int tile_frame, int wall_frame, int scenery_frame, int mode) {
+static void redraw_actions_editor(int tile_frame, int wall_frame, int scenery_frame, int mode) {
 	char temp[1024]; stringbuilder sb(temp);
 	auto pt = hot.mouse + game.camera;
 	if(current_hexagon != Blocked) {
@@ -460,67 +475,15 @@ static void render_actions_editor(int tile_frame, int wall_frame, int scenery_fr
 	}
 	sb.addn("Objects %1i", objects.getcount());
 	switch(mode) {
-	case 0:
-		add_util_info(sb, mode, tile_frame);
-		break;
-	case 1:
-		add_util_info(sb, mode, scenery_frame);
-		break;
-	case 2:
-		add_util_info(sb, mode, wall_frame);
-		break;
+	case 0: add_util_info(sb, mode, tile_frame); break;
+	case 1: add_util_info(sb, mode, scenery_frame); break;
+	case 2: add_util_info(sb, mode, wall_frame); break;
 	}
-	//auto push_fore = fore;
-	//setcolor(ColorInfo);
 	textf(4, 4, 300, temp);
-	//fore = push_fore;
 }
 
 short unsigned choose_wall(short unsigned start, int& mode);
-
-static short unsigned choose_tile(short unsigned start, int& mode) {
-	openform();
-	auto ps = gres(TILES);
-	auto origin = 0;
-	const int dx = tile_width;
-	const int mx = 8;
-	const int dy = tile_height;
-	const int my = 13;
-	int current = start;
-	while(ismodal()) {
-		rectf({0, 0, 640, 480}, colors::gray);
-		if(current < 0)
-			current = 0;
-		if(current > (int)ps->cicles - 1)
-			current = ps->cicles - 1;
-		if(current < origin)
-			origin = (current / mx) * mx;
-		if(current >= origin + my * mx)
-			origin = (current / mx) * mx - (my - 1) * mx;
-		if(origin < 0)
-			origin = 0;
-		auto index = origin;
-		for(auto y = dy; y <= dy * my; y += dy) {
-			for(auto x = dx / 2; x < dx * mx; x += dx) {
-				image(x, y, ps, ps->ganim(index, 0), 0);
-				if(current == index)
-					rectb({x - dx / 2, y - dy, x + dx / 2, y}, colors::red);
-				index++;
-			}
-		}
-		domodal();
-		switch(hot.key) {
-		case KeyEnter: mode = 0; breakmodal(current); break;
-		case KeyEscape: breakmodal(start); break;
-		case KeyLeft: current--; break;
-		case KeyRight: current++; break;
-		case KeyUp: current -= mx; break;
-		case KeyDown: current += mx; break;
-		}
-	}
-	closeform();
-	return getresult();
-}
+short unsigned choose_tile(short unsigned start, int& mode);
 
 static void apply_frame(int mode, int tile_frame, int scenery_frame, int wall_frame) {
 	switch(mode) {
@@ -592,8 +555,8 @@ void areai::editor() {
 		auto cursor_on_map = hot.mouse.in({0, 0, 640, 480 - 99});
 		if(cursor_on_map && current_hexagon != Blocked)
 			cursor.set(None, 0);
-		redraw_map();
-		render_actions_editor(tile_frame, wall_frame, scenery_frame, mode);
+		redraw_map(false);
+		redraw_actions_editor(tile_frame, wall_frame, scenery_frame, mode);
 		domodal();
 		switch(hot.key) {
 		case KeyDelete:
@@ -605,6 +568,14 @@ void areai::editor() {
 			break;
 		case KeySpace:
 			apply_frame(mode, tile_frame, scenery_frame, wall_frame);
+			break;
+		case 'C':
+			if(current_tile!=Blocked)
+				loc.correct(current_tile);
+			//loc.correct();
+			break;
+		case 'A':
+			loc.correct();
 			break;
 		case 'G': show_center = !show_center; break;
 		case 'R': show_roof = !show_roof; break;

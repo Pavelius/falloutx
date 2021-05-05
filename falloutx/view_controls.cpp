@@ -558,6 +558,14 @@ bool draw::istipsonetime() {
 	return true;
 }
 
+void draw::marker(int x, int y) {
+	auto push_fore = fore;
+	fore = colors::red;
+	line(x - 4, y, x + 4, y);
+	line(x, y - 4, x, y + 4);
+	fore = push_fore;
+}
+
 void actor::preview(int x, int y, gender_s gender, item_s armor, item_s weapon, unsigned tick) {
 	res_s rid;
 	int c = getcicle(rid, AnimateStand, gender, armor, weapon, tick % 6);

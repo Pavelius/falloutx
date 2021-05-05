@@ -63,7 +63,7 @@ static void test_adventure() {
 static void test_game() {
 	//test_tile();
 	game.setcamera({1000, 100});
-	if(!loc.read("test1")) {
+	if(!loc.read("test")) {
 		loc.clear();
 		loc.set(loc.geti(0, 0), bsdata<tilei>::elements[2], loc.width, loc.height);
 	}
@@ -123,11 +123,6 @@ static point s2h1(point pt) {
 	return{(short)-x, (short)y};
 }
 
-static void marker(point pt) {
-	line(pt.x - 4, pt.y, pt.x + 4, pt.y, colors::red);
-	line(pt.x, pt.y - 4, pt.x, pt.y + 4, colors::red);
-}
-
 static void test_hittest() {
 	char temp[260]; stringbuilder sb(temp);
 	static int walls_row[] = {775, 772, 773, 776, 777, 778};
@@ -147,7 +142,7 @@ static void test_hittest() {
 			for(auto x = 0; x < 6; x++) {
 				auto pt = h2s1(x, 0) - game.camera;
 				image(pt.x, pt.y, WALLS, walls_row[x], 0);
-				marker(pt);
+				marker(pt.x, pt.y);
 			}
 		}
 		if(false) {
@@ -227,7 +222,7 @@ int main(int argc, char* argv[]) {
 	game.add("Оставайтесь хладнокровными и берегитесь врагов!");
 	game.add("Длинный текст выглядит круто, кроме того его можно форматировать и прокручивать с помощью колеса мышки.");
 	//setstage(test_hittest);
-	setstage(test_game);
+	setstage(test_adventure);
 	//setstage(game.mainmenu);
 	runstage();
 	return 0;

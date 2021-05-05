@@ -52,3 +52,53 @@ mapobject* areai::find(indext index) {
 	}
 	return 0;
 }
+
+void areai::correct(indext i) {
+	static direction_s all[] = {Up, Right, Down, Left};
+	unsigned char c = 0;
+	auto t = getfloor(i);
+	auto p = tilei::find(t);
+	if(!p)
+		return;
+	for(auto d : all) {
+		c <<= 1;
+		auto i1 = tot(i, d);
+		if(i1 == Blocked)
+			continue;
+		auto v = getfloor(i1);
+		if(p->is(v))
+			c |= 1;
+	}
+	setfloor(i, p->correct(t, c));
+}
+
+indext areai::tot(indext i, direction_s d) {
+	auto x = getx(i);
+	auto y = gety(i);
+	switch(d) {
+	case Up:
+		if(y == 0)
+			return Blocked;
+		return geti(x, y - 1);
+	case Down:
+		if(y == height - 1)
+			return Blocked;
+		return geti(x, y + 1);
+	case Right:
+		if(x == width - 1)
+			return Blocked;
+		return geti(x + 1, y);
+	case Left:
+		if(x == 0)
+			return Blocked;
+		return geti(x - 1, y);
+	default:
+		return Blocked;
+	}
+}
+
+void areai::correct() {
+	for(auto y = 0; y < 100; y++)
+		for(auto x = 0; x < 100; x++)
+			correct(geti(x, y));
+}

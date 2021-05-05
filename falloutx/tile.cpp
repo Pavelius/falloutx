@@ -1,16 +1,17 @@
 #include "main.h"
 
-// up, right, down, left
-
+// up, right, down, left, sides, corners,
+// {CLeft|CDown, CLeft|CUp, CRight|CUp, CRight|CDown}
 BSDATA(tilei) = {
 	{{"TileDirt"}, {182, 183, 184, 185, 186, 187}},
 	{{"TileStep"}, {192, 193, 194, 195, 196, 197}},
-	{{"TileCave"}, {21, 22, 23, 24, 33, 35, /*32, 34, 36, 29, 30*/}, {}, {31, 32}},
-	{{"TileRock"}, {57, 58, 63, 64}, {59, 60, 61, 62}, {55, 56}, {51, 52}, {45}, {}},
+	{{"TileCave"}, {21, 22, 23, 24, 33, 35, /*32, 34, 36, 29, 30*/}, {}, {}},
+	{{"TileRock"}, {57, 58, 63, 64}, {59, 60, 61, 62}, {55, 56}, {51, 52}, {45}, {68, 66, 67, 65}},
 	{{"TileBorder"}, {2, 15, 16, 17}, {6}, {5}, {9}, {4}, {7, 10, 3, 8}, {13, 14, 11, 12}},
 	{{"TilePlates"}, {2276, 2277, 2278, 2279, 2280, 2281, 2282, 2283, 2284, 2285, 2286}},
+	{{"TileAcid"}, {1058, 1059, 1062, 1063}, {1054, 1055}, {1060, 1064, 1074}, {1066, 1067}, {1076, 1057, 1061}, {1056, 1068, 1065, 1053}},
 };
-assert_enum(tilei, TilePlates)
+assert_enum(tilei, TileAcid)
 
 // LeftUp, Up, RightUp, Right, RightDown, Down, LeftDown, Left,
 // LeftUp, RightUp, RightDown, LeftDown
@@ -67,6 +68,13 @@ static bool have(const tilea& source, unsigned short v) {
 	return false;
 }
 
+static short unsigned randomc(const tilea& source) {
+	auto s = source.size();
+	if(!s)
+		return 0;
+	return source.begin()[rand() % s];
+}
+
 static bool have(const short unsigned* source, unsigned short v) {
 	return source[0] == v
 		|| source[1] == v
@@ -89,4 +97,55 @@ int tilei::random() const {
 	if(!s)
 		return 0;
 	return center.begin()[rand() % s];
+}
+
+tilei* tilei::find(short unsigned t) {
+	for(auto& e : bsdata<tilei>()) {
+		if(e.is(t))
+			return &e;
+	}
+	return 0;
+}
+
+short unsigned getrandomie(tilea& source, short unsigned t) {
+	if(source.size() == 0)
+		return t;
+	if(have(source, t))
+		return t;
+	return randomc(source);
+}
+
+short unsigned getrandomie(short unsigned t1, short unsigned t) {
+	return t1 ? t1 : t;
+}
+
+short unsigned tilei::correct(short unsigned t, unsigned char c) {
+	const unsigned char CUp = 8;
+	const unsigned char CRight = 4;
+	const unsigned char CDown = 2;
+	const unsigned char CLeft = 1;
+	switch(c) {
+	case 0:
+		return t;
+	case CUp | CRight | CDown:
+		return getrandomie(left, t);
+	case CUp | CLeft| CDown:
+		return getrandomie(right, t);
+	case CLeft | CRight | CDown:
+		return getrandomie(up, t);
+	case CLeft | CRight | CUp:
+		return getrandomie(down, t);
+	case CUp | CLeft:
+		return getrandomie(sides[1], t);
+	case CUp | CRight:
+		return getrandomie(sides[2], t);
+	case CDown | CRight:
+		return getrandomie(sides[3], t);
+	case CDown | CLeft:
+		return getrandomie(sides[0], t);
+	default:
+		if(have(center, t))
+			return t;
+		return randomc(center);
+	}
 }

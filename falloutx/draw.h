@@ -84,7 +84,7 @@ struct sprite : pma {
 		encodes			encode;
 		unsigned		pallette;
 		unsigned		offset;
-		rect			getrect(int x, int y, unsigned flags) const;
+		void			getrect(rect& result, int x, int y, unsigned flags) const;
 	};
 	struct cicle {
 		short unsigned	start;
@@ -244,6 +244,7 @@ void					gradv(rect rc, const color c1, const color c2, int skip = 0);
 void					gradh(rect rc, const color c1, const color c2, int skip = 0);
 int						hittest(int x, int test_x, const char* string, int lenght);
 int						hittest(rect rc, const char* string, unsigned state, point mouse);
+bool					hittest(point pt, int x, int y, const sprite* e, int id, int flags);
 inline bool				ischecked(unsigned flags) { return (flags&Checked) != 0; }
 inline bool				isdisabled(unsigned flags) { return (flags&Disabled) != 0; }
 inline bool				isfocused(unsigned flags) { return (flags&Focused) != 0; }

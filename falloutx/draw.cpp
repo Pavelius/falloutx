@@ -1627,6 +1627,32 @@ int draw::hittest(rect rc, const char* string, unsigned state, point pt) {
 	return -1;
 }
 
+bool draw::hittest(point pt, int x, int y, const sprite* e, int id, int flags) {
+	if(!e)
+		return false;
+	const sprite::frame& f = e->get(id);
+	if(!f.offset)
+		return false;
+	rect rc; f.getrect(rc, x, y, flags);
+	if(!pt.in(rc))
+		return false;
+	unsigned char* s = (unsigned char*)e + f.offset;
+	int wd = (flags & ImageMirrorV) ? -canvas->scanline : canvas->scanline;
+	switch(f.encode) {
+	case sprite::RAW: break;
+	case sprite::RAW8: break;
+	case sprite::RLE8:
+		break;
+	case sprite::RLE:
+		break;
+	case sprite::ALC:
+		break;
+	default:
+		break;
+	}
+	return true;
+}
+
 void draw::image(int x, int y, const sprite* e, int id, int flags, unsigned char alpha) {
 	int x2, y2;
 	color* pal;
@@ -1800,7 +1826,7 @@ void draw::stroke(int x, int y, const sprite* e, int id, int flags, unsigned cha
 	tr.g = 255;
 	tr.b = 255;
 	auto fr = e->get(id);
-	rect rc = fr.getrect(x, y, flags);
+	rect rc; fr.getrect(rc, x, y, flags);
 	surface canvas(rc.width() + 2, rc.height() + 2, 32);
 	x--; y--;
 	if(true) {
@@ -1965,10 +1991,11 @@ int sprite::glyph(unsigned sym) const {
 	return 't' - 0x21; // Unknown symbol is question mark
 }
 
-rect sprite::frame::getrect(int x, int y, unsigned flags) const {
+void sprite::frame::getrect(rect& result, int x, int y, unsigned flags) const {
+	result.set(0, 0, 0, 0);
 	int x2, y2;
 	if(!offset)
-		return{0, 0, 0, 0};
+		return;
 	if(flags & ImageMirrorH) {
 		x2 = x;
 		if((flags & ImageNoOffset) == 0)
@@ -1989,7 +2016,7 @@ rect sprite::frame::getrect(int x, int y, unsigned flags) const {
 			y -= oy;
 		y2 = y + sy;
 	}
-	return{x, y, x2, y2};
+	result.set(x, y, x2, y2);
 }
 
 surface::plugin* surface::plugin::first;

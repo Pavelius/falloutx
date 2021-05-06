@@ -16,8 +16,10 @@ BSDATA(actioni) = {
 	{{"Turn"}, 260},
 	{{"Unload"}, 301},
 	{{"Use"}, 264},
+	{{"UseItem"}, 256},
+	{{"UseSkill"}, 303},
 };
-assert_enum(actioni, Use)
+assert_enum(actioni, UseSkill)
 
 void actiona::add(action_s type, char ap, bool aimed) {
 	auto p = adat::add();

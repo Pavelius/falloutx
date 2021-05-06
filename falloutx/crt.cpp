@@ -426,6 +426,13 @@ int	array::indexof(const void* element) const {
 	return -1;
 }
 
+void* array::ptr(const void* v) const {
+	auto i = indexof(v);
+	if(i == -1)
+		return 0;
+	return (char*)data + i * size;
+}
+
 void* array::insert(int index, const void* element) {
 	auto count_before = getcount(); add();
 	memmove((char*)data + (index + 1) * size, (char*)data + index * size, (count_before - index) * size);

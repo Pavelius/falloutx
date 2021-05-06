@@ -141,8 +141,9 @@ static void render_inventory(creaturei& player) {
 	source.paint({x + 42, y + 40, x + 42 + 70, y + 40 + 300}, origin, 1, {(short)(x + 42 + 80), (short)(y + 40 - 4)});
 	if(buttonf(x + 432, y + 322, 299, 300, KeyEscape, false))
 		buttoncancel();
-	if(isactionmode() && hilite_item) {
-		addaction(Look, look_item, hilite_item, 0, item::getobjectname);
+	if(setactionmode() && hilite_item) {
+		addaction(item::getobjectname);
+		addaction(Look, look_item, hilite_item, 0);
 		addaction(Drop, drop_item, hilite_item, 0);
 		if(hilite_item->isweapon() && hilite_item->getclipcount())
 			addaction(Unload, unload_item, hilite_item, 0);
@@ -167,19 +168,13 @@ static item* choose_drag_target(creaturei& player, screenshoot& screen, item& so
 
 void creaturei::inventory() {
 	screenshoot screen;
-	setactionmode(false);
 	openform();
 	while(ismodal()) {
 		screen.restore();
 		cursor.set(INTRFACE, 286);
 		render_inventory(*this);
 		domodal();
-		switch(hot.key) {
-		case MouseRight:
-			if(hot.pressed && !isactionmode())
-				setactionmode(true);
-			break;
-		case MouseLeft:
+		if(hot.key==MouseLeft) {
 			if(!isactionmode() && hot.pressed && hilite_item) {
 				auto source = hilite_item;
 				auto element = *hilite_item;
@@ -202,7 +197,6 @@ void creaturei::inventory() {
 				update();
 				reanimate();
 			}
-			break;
 		}
 	}
 	closeform();
@@ -246,7 +240,6 @@ void creaturei::trade(creaturei& opponent) {
 	int opponent_act;
 	int text_origin = 0, text_maximum = 0;
 	inform(opponent.getspeech(dlg, 1));
-	setactionmode(false);
 	while(ismodal()) {
 		opponent_act = 0;
 		hilite_item = 0;
@@ -290,15 +283,14 @@ void creaturei::trade(creaturei& opponent) {
 		}
 		if(buttonf(583, 452, 96, 95, KeyEscape, false))
 			execute(buttoncancel);
-		if(isactionmode() && hilite_item) {
+		if(setactionmode() && hilite_item) {
 			addaction(Look, look_trade_item, hilite_item, 0);
 			addaction(NoAction, 0, 0, 0);
 		}
 		domodal();
 		if(opponent_act)
 			inform(opponent.getspeech(dlg, opponent_act));
-		switch(hot.key) {
-		case MouseLeft:
+		if(hot.key==MouseLeft) {
 			if(!isactionmode() && hilite_item) {
 				if(hot.pressed) {
 					inform(hilite_item->geti().txt.text);
@@ -312,11 +304,6 @@ void creaturei::trade(creaturei& opponent) {
 						opponent.additem(*hilite_item);
 				}
 			}
-			break;
-		case MouseRight:
-			if(hot.pressed && !isactionmode())
-				setactionmode(true);
-			break;
 		}
 	}
 	push.restore();

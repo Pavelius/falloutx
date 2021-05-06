@@ -95,7 +95,7 @@ enum action_s : unsigned char {
 	Swing, Thrust, Throw,
 	FireSingle, FireBurst, Reload,
 	Drop, Look, Talk, Turn, Unload,
-	Use,
+	Use, UseItem, UseSkill,
 };
 enum wound_s : unsigned char {
 	WoundEye,
@@ -316,6 +316,7 @@ struct drawable : public point {
 	void				add(point v) { x += v.x; y += v.y; }
 	bool				getrect(rect& result, point camera);
 	static draw::res_s	getrid(item_s armor, gender_s gender);
+	static const char*	getnamefn(const void* object, stringbuilder& sb);
 	bool				hittest(point mouse) const;
 	void				paint() const { paint(x, y, 0); }
 	void				paint(int x, int y, unsigned flags = 0) const;
@@ -739,7 +740,8 @@ struct anminfo {
 	static const anminfo* get(const sprite* p);
 	static const anminfo* get(res_s rid);
 };
-void					addaction(action_s a, fnevent proc, void* object, int param, fntext getname = 0);
+void					addaction(fntext getname);
+void					addaction(action_s a, fnevent proc, void* object, int param);
 void					animate(int x, int y, sprite* ps, int cicle, int fps = 6, int frame = -1, int frame_end = -2);
 void					background(int cicle);
 bool					button(int x, int y, int width, const char* string, unsigned key, rect* return_rc = 0);
@@ -785,7 +787,7 @@ point					s2h(point v);
 point					s2t(point v); // Convert screen coordinates to tile index
 void					scrollup(const rect& rc, int& origin, int maximum);
 void					scrollup(const rect& rc, int& origin, int& maximum, const char* format);
-void					setactionmode(bool active);
+bool					setactionmode();
 void					setcolor(color_s v);
 void					seteditpos(unsigned index);
 void					setfocus(variant v);

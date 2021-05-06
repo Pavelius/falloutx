@@ -71,3 +71,12 @@ bool drawable::getrect(rect& result, point camera) {
 	ps->get(frame).getrect(result, x - camera.x, y - camera.y, 0);
 	return true;
 }
+
+const char* drawable::getnamefn(const void* object, stringbuilder& sb) {
+	auto p = (creaturei*)bsdata<creaturei>::source.ptr(object);
+	if(!p)
+		p = (creaturei*)game.playersa.ptr(object);
+	if(p)
+		return p->getname();
+	return "Куча непойми чего";
+}

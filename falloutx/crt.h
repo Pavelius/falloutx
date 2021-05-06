@@ -225,6 +225,7 @@ public:
 	bool							is(const void* e) const { return e >= data && e < (char*)data + count*size; }
 	bool							isgrowable() const { return (count_maximum & 0x80000000) == 0; }
 	void*							ptr(int index) const { return (char*)data + size * index; }
+	void*							ptr(const void* v) const;
 	template<class T> aref<T> records() const { return aref<T>((T*)data, count); }
 	void							remove(int index, int elements_count = 1);
 	void							shift(int i1, int i2, unsigned c1, unsigned c2);

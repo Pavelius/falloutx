@@ -16,7 +16,6 @@ struct action_widget {
 	fnevent				proc;
 	void*				object;
 	int					param;
-	fntext				getname;
 	void				execute();
 };
 }
@@ -25,6 +24,7 @@ static bool				break_modal;
 static int				break_result;
 static point			camera;
 static fnevent			mainproc;
+static fntext			action_getname;
 fnevent					draw::domodal;
 extern rect				sys_static_area;
 extern unsigned char	color_pallette[256 * 3];
@@ -36,7 +36,7 @@ static unsigned			caret_position;
 static unsigned			stamp_position;
 static point			mouse_position;
 static unsigned			stamp_pressed;
-static bool				action_mode;
+static int				action_mode;
 drawable				draw::cursor;
 static adat<action_widget, 24> contextmenu;
 static adat<number_widget, 24> number_widgets;
@@ -119,13 +119,16 @@ void draw::setpallette(int daylight) {
 	draw::palt = color_values;
 }
 
-void draw::addaction(action_s a, fnevent proc, void* object, int param, fntext getname) {
+void draw::addaction(fntext getname) {
+	action_getname = getname;
+}
+
+void draw::addaction(action_s a, fnevent proc, void* object, int param) {
 	auto p = contextmenu.add();
 	p->action = a;
 	p->object = object;
 	p->proc = proc;
 	p->param = param;
-	p->getname = getname;
 }
 
 bool draw::radio(int x, int y, int cicle, unsigned key) {
@@ -662,11 +665,9 @@ static action_widget* context_menu() {
 	openform();
 	point cps; getcursor(cps);
 	const auto size = 40;
-	auto push_action = action_mode;
 	auto push_mouse = hot.mouse;
 	auto menu = contextmenu;
 	auto height = menu.getcount() * size;
-	action_mode = false;
 	while(ismodal()) {
 		screen.restore();
 		cursor.set(None, 0);
@@ -697,36 +698,47 @@ static action_widget* context_menu() {
 	}
 	setcursor(cps);
 	hot.mouse = push_mouse;
-	action_mode = push_action;
 	closeform();
 	return (action_widget*)getresult();
+}
+
+bool draw::isactionmode() {
+	return action_mode != 0;
+}
+
+bool draw::setactionmode() {
+	switch(hot.key) {
+	case MouseRight:
+		if(hot.pressed)
+			execute(setint, action_mode ? 0 : 1, 0, &action_mode);
+		break;
+	}
+	if(action_mode)
+		cursor.set(INTRFACE, 250);
+	return action_mode != 0;
 }
 
 static void standart_domodal() {
 	static void* tips_object;
 	auto x = hot.mouse.x + cursor.x;
 	auto y = hot.mouse.y + cursor.y;
-	if(action_mode) {
-		auto ps = gres(INTRFACE);
-		if(ps) {
-			image(x, y, ps, ps->ganim(250, 0), 0);
-			if(contextmenu && istips(500)) {
-				auto& e = contextmenu[0];
-				auto frame = bsdata<actioni>::elements[e.action].avatar;
-				image(x + 48, y + 40, ps, ps->ganim(frame + 1, 0), 0);
-				if(tips_object != e.object) {
-					tips_object = e.object;
-					if(e.getname) {
-						char temp[260]; stringbuilder sb(temp);
-						game.add("Это %1.", e.getname(e.object, sb));
-					}
+	auto ps = gres(cursor.rid);
+	image(x, y, ps,
+		cursor.frame + getuitime() % (cursor.frame_stop - cursor.frame_start + 1), 0);
+	if(ps && cursor.rid == INTRFACE && cursor.frame == ps->gcicle(250)->start) {
+		if(contextmenu && istips(500)) {
+			auto& e = contextmenu[0];
+			auto frame = bsdata<actioni>::elements[e.action].avatar;
+			image(x + 48, y + 40, ps, ps->ganim(frame + 1, 0), 0);
+			if(tips_object != e.object) {
+				tips_object = e.object;
+				if(action_getname) {
+					char temp[260]; stringbuilder sb(temp);
+					game.add(action_getname(tips_object, sb));
 				}
-			} else
-				tips_object = 0;
-		}
-	} else {
-		image(x, y, gres(cursor.rid),
-			cursor.frame + getuitime() % (cursor.frame_stop - cursor.frame_start + 1), 0);
+			}
+		} else
+			tips_object = 0;
 	}
 	hot.key = rawinput();
 	tick = getunsigedtick();
@@ -752,14 +764,6 @@ static void standart_domodal() {
 			}
 		}
 		break;
-	case MouseRight:
-		if(isactionmode()) {
-			if(hot.pressed) {
-				setactionmode(false);
-				hot.zero();
-			}
-		}
-		break;
 	}
 	if(action_mode) {
 		if(contextmenu && ispressed()) {
@@ -772,21 +776,14 @@ static void standart_domodal() {
 	}
 }
 
-bool draw::isactionmode() {
-	return action_mode;
-}
-
 bool draw::isdefaultinput() {
 	return domodal == standart_domodal;
-}
-
-void draw::setactionmode(bool v) {
-	action_mode = v;
 }
 
 bool draw::ismodalex() {
 	cursor.set(INTRFACE, 267, {0, 0});
 	contextmenu.clear();
+	action_getname = 0;
 	domodal = standart_domodal;
 	return true;
 }

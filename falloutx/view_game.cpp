@@ -225,16 +225,11 @@ static void redraw_hexagon() {
 	image(pt.x - 15, pt.y - 10, INTRFACE, 1);
 }
 
-static void control_map(bool mouse_events) {
-	rect rc = {0, 0, 640, 480 - 99};
-	if(mouse_events && hot.mouse.in(rc)) {
-		switch(hot.key) {
-		case MouseRight:
-			if(hot.pressed && !isactionmode())
-				setactionmode(true);
-			break;
-		}
-	}
+static void chat_creature() {
+
+}
+
+static void control_map() {
 	const int dx = 16;
 	const int dy = 12;
 	switch(hot.key) {
@@ -259,8 +254,25 @@ static void redraw_map(bool mouse_events) {
 	redraw_objects();
 	if(show_roof)
 		redraw_roof();
-	redraw_hexagon();
-	control_map(mouse_events);
+}
+
+static void control_hilite() {
+	if(!hot.mouse.in({0, 0, 640, 480 - 99}))
+		return;
+	set_current_hexagon();
+	if(setactionmode()) {
+		if(hilite_object) {
+			addaction(drawable::getnamefn);
+			addaction(Talk, chat_creature, hilite_object, 0);
+			addaction(Look, chat_creature, hilite_object, 0);
+			addaction(UseItem, chat_creature, hilite_object, 0);
+			addaction(UseSkill, chat_creature, hilite_object, 0);
+			addaction(NoAction, chat_creature, 0, 0);
+		}
+	} else {
+		cursor.set(None, 0);
+		redraw_hexagon();
+	}
 }
 
 static drawable* choose_target() {
@@ -440,6 +452,8 @@ void gamei::play() {
 	while(ismodal()) {
 		redraw_map(true);
 		redraw_actions();
+		control_hilite();
+		control_map();
 		domodal();
 		update_objects();
 	}
@@ -570,7 +584,7 @@ void areai::editor() {
 			apply_frame(mode, tile_frame, scenery_frame, wall_frame);
 			break;
 		case 'C':
-			if(current_tile!=Blocked)
+			if(current_tile != Blocked)
 				loc.correct(current_tile);
 			//loc.correct();
 			break;

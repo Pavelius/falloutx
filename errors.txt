@@ -1,2 +1,3 @@
-﻿In localization file command.txt
- Not found translation TradeInfo
+﻿In localization file action.txt
+ Not found translation UseItem
+ Not found translation UseSkill

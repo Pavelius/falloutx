@@ -1,8 +1,9 @@
 #include "main.h"
 #include "datetime.h"
 
-gamei		game;
-array		gamei::playersa(game.players, sizeof(game.players[0]), sizeof(game.players)/sizeof(game.players[0]), sizeof(game.players) / sizeof(game.players[0]));
+gamei				game;
+array				gamei::playersa(game.players, sizeof(game.players[0]), sizeof(game.players)/sizeof(game.players[0]), sizeof(game.players) / sizeof(game.players[0]));
+static unsigned		game_tick;
 
 void gamei::clear() {
 	memset(this, 0, sizeof(*this));
@@ -47,4 +48,25 @@ void gamei::introducing() {
 
 void gamei::passtime(unsigned v) {
 	minutes += v;
+}
+
+unsigned gamei::getaitime() {
+	return game_tick;
+}
+
+void gamei::update() {
+	static unsigned last_tick;
+	auto m = draw::getuitime();
+	if(!last_tick || (m - last_tick) >= 2000)
+		last_tick = m;
+	game_tick += m - last_tick;
+	last_tick = m;
+	for(auto& e : bsdata<creaturei>()) {
+		if(e)
+			e.updateanm();
+	}
+	for(auto& e : game.players) {
+		if(e)
+			e.updateanm();
+	}
 }

@@ -36,7 +36,7 @@ static void test_adventure() {
 	player.add(X12GaShotgunShells, 10);
 	player.add(AdvancedPowerArmor, 1);
 	player.add(AdvPowerArmorMKII, 1);
-	player.setposition({1000, 100});
+	player.setposition(h2s({20, 20}));
 	player.setdirection(2);
 	player.setanimate(AnimateStand, true);
 	game.setcamera({1000, 100});
@@ -44,16 +44,16 @@ static void test_adventure() {
 		loc.clear();
 		loc.set(loc.geti(0, 0), bsdata<tilei>::elements[2], 128, 128);
 	}
-	auto opponent = bsdata<creaturei>::add();
-	opponent->create(Narg);
-	opponent->add(Knife, 1);
-	opponent->add(Spear, 1);
-	opponent->add(Spear, 1);
-	opponent->add(X10mmPistol, 1);
-	opponent->add(X10mmSMG, 1);
-	opponent->setposition({900, 100});
-	opponent->setdirection(4);
-	opponent->setanimate(AnimateStand, true);
+	//auto opponent = bsdata<creaturei>::add();
+	//opponent->create(Narg);
+	//opponent->add(Knife, 1);
+	//opponent->add(Spear, 1);
+	//opponent->add(Spear, 1);
+	//opponent->add(X10mmPistol, 1);
+	//opponent->add(X10mmSMG, 1);
+	//opponent->setposition({900, 100});
+	//opponent->setdirection(4);
+	//opponent->setanimate(AnimateStand, true);
 	//player.chat(*opponent, "manors");
 	//player.trade(*opponent);
 	//game.getplayer().charsheet();

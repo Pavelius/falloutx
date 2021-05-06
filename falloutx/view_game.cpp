@@ -185,17 +185,6 @@ static void prepare_objects() {
 	objects.sortz();
 }
 
-static void update_objects() {
-	for(auto p : objects) {
-		variant v = p;
-		switch(v.type) {
-		case Creature:
-			((creaturei*)v.getpointer())->updateanm();
-			break;
-		}
-	}
-}
-
 static void redraw_objects() {
 	hilite_object = 0;
 	auto mouse = hot.mouse + game.camera;
@@ -455,7 +444,7 @@ void gamei::play() {
 		control_hilite();
 		control_map();
 		domodal();
-		update_objects();
+		game.update();
 	}
 	closeform();
 }

@@ -42,7 +42,7 @@ void actor::reanimate() {
 	draw::res_s rid;
 	auto cicle = getcicle(rid, animate, getgender(), getarmor(), getweapon(), direction);
 	set(rid, cicle);
-	next_stamp = draw::getuitime();
+	next_stamp = game.getaitime();
 }
 
 void actor::setdirection(unsigned char v) {
@@ -59,12 +59,17 @@ void actor::setanimate(animate_s v, bool force) {
 
 bool wearable::additem(item& ei) {
 	for(auto& e : gears) {
-		if(!e) {
-			e = ei;
-			ei.clear();
+		if(!e)
+			continue;
+		if(e.join(ei))
 			return true;
-		} else if(e.join(ei))
-			return true;
+	}
+	for(auto& e : gears) {
+		if(e)
+			continue;
+		e = ei;
+		ei.clear();
+		return true;
 	}
 	return false;
 }

@@ -13,7 +13,7 @@ creaturei* creaturei::ptr(const void* v) {
 }
 
 void creaturei::updateanm() {
-	if(next_stamp >= draw::getuitime())
+	if(next_stamp >= game.getaitime())
 		return;
 	next_stamp += 2500 / 10;
 	if(!drawable::update())

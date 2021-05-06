@@ -638,6 +638,7 @@ public:
 	static bool			choosename(int x, int y, char* value, unsigned maximum);
 	void				clear();
 	static void			combat();
+	static unsigned		getaitime();
 	bool				getcar() const { return car; }
 	int					getday() const;
 	int					gethour() const;
@@ -660,6 +661,7 @@ public:
 	void				setcamera(point v);
 	void				setdate(int year, int month, int day, int hour, int minute);
 	void				setposiiton(point v) { position = v; }
+	static void			update();
 	static void			worldmap();
 	void				write(const char* url) const;
 };

@@ -36,7 +36,7 @@ static void test_adventure() {
 	player.add(X12GaShotgunShells, 10);
 	player.add(AdvancedPowerArmor, 1);
 	player.add(AdvPowerArmorMKII, 1);
-	player.setposition(h2s({20, 20}));
+	player.setposition(h2s({23, 25}));
 	player.setdirection(2);
 	player.setanimate(AnimateStand, true);
 	game.setcamera({1000, 100});

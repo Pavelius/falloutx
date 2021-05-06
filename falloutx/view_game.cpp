@@ -207,6 +207,8 @@ void set_current_hexagon() {
 static void redraw_hexagon() {
 	if(current_hexagon == Blocked)
 		return;
+	if(isactionmode())
+		return;
 	auto x = loc.gethx(current_hexagon);
 	auto y = loc.gethy(current_hexagon);
 	current_tile = loc.geti(x / 2, y / 2);
@@ -239,6 +241,7 @@ static void control_map() {
 
 static void redraw_map(bool mouse_events) {
 	redraw_floor();
+	redraw_hexagon();
 	prepare_objects();
 	redraw_objects();
 	if(show_roof)
@@ -258,10 +261,8 @@ static void control_hilite() {
 			addaction(UseSkill, chat_creature, hilite_object, 0);
 			addaction(NoAction, chat_creature, 0, 0);
 		}
-	} else {
+	} else
 		cursor.set(None, 0);
-		redraw_hexagon();
-	}
 }
 
 static drawable* choose_target() {
@@ -301,6 +302,12 @@ static void endcombat() {
 }
 
 static void change_item() {
+	auto& player = game.getplayer();
+	player.setanimate(AnimateWeaponTakeOff);
+	player.wait();
+	player.changeitems();
+	player.setanimate(AnimateWeaponTakeOn);
+	player.wait();
 }
 
 static void change_item_action() {
@@ -445,6 +452,9 @@ void gamei::play() {
 		control_map();
 		domodal();
 		game.update();
+		switch(hot.key) {
+		case 'G': show_center = !show_center; break;
+		}
 	}
 	closeform();
 }
@@ -454,7 +464,6 @@ void gamei::combat() {
 	openform();
 	while(ismodal()) {
 		rect rc = {0, 0, 640, 480 - 99};
-		rectf(rc, colors::gray);
 		if(ishilite(rc))
 			cursor.set(INTRFACE, 250);
 		redraw_map(false);
@@ -463,6 +472,22 @@ void gamei::combat() {
 	}
 	closeform();
 	animate(608, 477, gres(INTRFACE), 104, 10, -2, -1);
+}
+
+void actor::wait() {
+	auto current_action = animate;
+	auto stop = frame_stop;
+	while(ismodal()) {
+		cursor.set(INTRFACE, 295);
+		if(stop == frame && next_stamp >= game.getaitime())
+			break;
+		redraw_map(false);
+		redraw_actions(true);
+		game.update();
+		if(current_action != animate)
+			break;
+		domodal();
+	}
 }
 
 void add_util_info(stringbuilder& sb, int mode, int value);

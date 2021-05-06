@@ -35,6 +35,11 @@ void creaturei::updateanm() {
 		setanimate(getanimate(ai.next_dead, w));
 	else
 		setanimate(getanimate(ai.next, w));
+	switch(getanimate()) {
+	case AnimateStand:
+		next_stamp += xrand(3, 6) * 1000;
+		break;
+	}
 }
 
 void creaturei::clear() {
@@ -220,4 +225,8 @@ void creaturei::add(stringbuilder& sb, const item& weapon) const {
 		sb.addn(" ");
 		sb.addn(" ");
 	}
+}
+
+void creaturei::changeitems() {
+	iswap(getweapon(0), getweapon(1));
 }

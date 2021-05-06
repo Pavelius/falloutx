@@ -495,6 +495,7 @@ public:
 	void				reanimate();
 	void				setanimate(animate_s v, bool force = false);
 	void				setdirection(unsigned char v);
+	void				wait();
 };
 class itema : public adat<item*, 512> {
 public:
@@ -523,6 +524,7 @@ public:
 	void				addexp(int v) {}
 	void				apply(const pregeni& e);
 	void				clear();
+	void				changeitems();
 	void				charsheet();
 	void				chat(creaturei& opponent, const char* cid);
 	variant				chooseskill() const;

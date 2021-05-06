@@ -44,13 +44,14 @@ const itemi& item::geti() const {
 }
 
 int item::getclipcount() const {
-	if(!geti().weapon.ammo)
+	if(!geti().weapon.ammo_count)
 		return 0;
 	return ammo_count;
 }
 
 bool item::setclipcount(int v) {
-	if(!geti().weapon.ammo)
+	const auto& ei = geti();
+	if(!ei.weapon.ammo_count)
 		return false;
 	ammo_count = v;
 	return true;
@@ -58,7 +59,7 @@ bool item::setclipcount(int v) {
 
 item_s item::getclipammo() const {
 	const auto& ei = geti();
-	if(!ei.weapon.ammo)
+	if(!ei.weapon.ammo_count)
 		return NoItem;
 	if(!ammo_count)
 		return NoItem;
@@ -145,9 +146,28 @@ const char*	item::getobjectname(const void* object, stringbuilder& sb) {
 	return ((item*)object)->getname();
 }
 
-item& item::create() {
+void item::create() {
 	auto& ei = geti();
-	if(ei.weapon.ammo)
+	if(ei.weapon.ammo_count)
 		setclipcount(ei.weapon.ammo_count);
-	return *this;
+	else if(ei.ammo.count)
+		setcount(ei.ammo.count);
+}
+
+creaturei* item::getowner() const {
+	return creaturei::ptr(this);
+}
+
+bool item::unload() {
+	if(getclipcount() == 0)
+		return false;
+	auto owner = getowner();
+	if(!owner)
+		return false;
+	item it(getclipammo());
+	it.setcount(getclipcount());
+	if(!owner->additem(it))
+		return false;
+	setclipcount(0);
+	return true;
 }

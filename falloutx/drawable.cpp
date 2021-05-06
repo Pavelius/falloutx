@@ -73,9 +73,7 @@ bool drawable::getrect(rect& result, point camera) {
 }
 
 const char* drawable::getnamefn(const void* object, stringbuilder& sb) {
-	auto p = (creaturei*)bsdata<creaturei>::source.ptr(object);
-	if(!p)
-		p = (creaturei*)game.playersa.ptr(object);
+	auto p = creaturei::ptr(object);
 	if(p)
 		return p->getname();
 	auto pm = (mapobject*)bsdata<mapobject>::source.ptr(object);

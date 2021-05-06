@@ -2,6 +2,16 @@
 
 BSDATAC(creaturei, 240)
 
+creaturei* creaturei::ptr(const void* v) {
+	auto p = (creaturei*)bsdata<creaturei>::source.ptr(v);
+	if(p)
+		return p;
+	p = (creaturei*)game.playersa.ptr(v);
+	if(p)
+		return p;
+	return 0;
+}
+
 void creaturei::updateanm() {
 	if(next_stamp >= draw::getuitime())
 		return;

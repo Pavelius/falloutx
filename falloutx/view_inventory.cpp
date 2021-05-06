@@ -19,6 +19,8 @@ static void use_item() {
 }
 
 static void unload_item() {
+	auto p = (item*)hot.object;
+	p->unload();
 }
 
 static void itemtext(int x, int y, int width, int height, const item& it) {
@@ -145,7 +147,7 @@ static void render_inventory(creaturei& player) {
 		addaction(item::getobjectname);
 		addaction(Look, look_item, hilite_item, 0);
 		addaction(Drop, drop_item, hilite_item, 0);
-		if(hilite_item->isweapon() && hilite_item->getclipcount())
+		if(hilite_item->getclipcount())
 			addaction(Unload, unload_item, hilite_item, 0);
 		addaction(NoAction, 0, 0, 0);
 	}

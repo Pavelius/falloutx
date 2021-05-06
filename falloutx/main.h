@@ -413,7 +413,7 @@ public:
 	bool				addcount(int v) { return setcount(getcount() + v); }
 	void				addtext(stringbuilder& sb) const;
 	void				clear();
-	item&				create();
+	void				create();
 	item_s				getclipammo() const;
 	int					getclipcount() const;
 	int					getcount() const;
@@ -422,12 +422,14 @@ public:
 	const itemi&		geti() const;
 	const char*			getname() const { return geti().txt.name; }
 	static const char*	getobjectname(const void* object, stringbuilder& sb);
+	creaturei*			getowner() const;
 	bool				isarmor() const { return geti().isarmor(); }
 	bool				isranged() const { return geti().isranged(); }
 	bool				isweapon() const { return geti().isweapon(); }
 	bool				join(item& e);
 	bool				setclipcount(int v);
 	bool				setcount(int v);
+	bool				unload();
 };
 struct pregeni {
 	texti				txt;
@@ -540,6 +542,7 @@ public:
 	bool				is(perk_s v) const { return current.perks.is(v); }
 	bool				is(trait_s v) const { return current.trait.is(v); }
 	bool				is(wound_s v) const { return current.wounds.is(v); }
+	static creaturei*	ptr(const void* v);
 	bool				raise(skill_s v, int i, bool interactive);
 	bool				raise(stat_s v, int i, bool interactive);
 	bool				toggle(skill_s v, bool interactive);

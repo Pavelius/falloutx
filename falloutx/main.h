@@ -413,6 +413,7 @@ public:
 	bool				addcount(int v) { return setcount(getcount() + v); }
 	void				addtext(stringbuilder& sb) const;
 	void				clear();
+	item&				create();
 	item_s				getclipammo() const;
 	int					getclipcount() const;
 	int					getcount() const;

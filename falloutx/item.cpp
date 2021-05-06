@@ -44,19 +44,25 @@ const itemi& item::geti() const {
 }
 
 int item::getclipcount() const {
-	auto& ei = geti();
-	if(!ei.weapon.ammo)
+	if(!geti().weapon.ammo)
 		return 0;
 	return ammo_count;
 }
 
+bool item::setclipcount(int v) {
+	if(!geti().weapon.ammo)
+		return false;
+	ammo_count = v;
+	return true;
+}
+
 item_s item::getclipammo() const {
-	auto& ei = geti();
+	const auto& ei = geti();
 	if(!ei.weapon.ammo)
 		return NoItem;
 	if(!ammo_count)
 		return NoItem;
-	return ei.weapon.ammo;
+	return (item_s)(ei.weapon.ammo + ammo_index);
 }
 
 int item::getcount() const {
@@ -137,4 +143,11 @@ void item::addtext(stringbuilder& sb) const {
 
 const char*	item::getobjectname(const void* object, stringbuilder& sb) {
 	return ((item*)object)->getname();
+}
+
+item& item::create() {
+	auto& ei = geti();
+	if(ei.weapon.ammo)
+		setclipcount(ei.weapon.ammo_count);
+	return *this;
 }

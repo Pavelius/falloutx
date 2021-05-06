@@ -78,5 +78,12 @@ const char* drawable::getnamefn(const void* object, stringbuilder& sb) {
 		p = (creaturei*)game.playersa.ptr(object);
 	if(p)
 		return p->getname();
-	return "Куча непойми чего";
+	auto pm = (mapobject*)bsdata<mapobject>::source.ptr(object);
+	if(pm) {
+		if(pm->rid == WALLS)
+			return "Стена";
+		if(pm->rid == SCENERY)
+			return "Куча непойми чего";
+	}
+	return 0;
 }

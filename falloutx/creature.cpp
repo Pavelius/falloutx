@@ -161,6 +161,7 @@ void creaturei::add(variant v, int i) {
 	if(v.type == Item) {
 		item e((item_s)v.value);
 		e.setcount(i);
+		e.create();
 		additem(e);
 	} else
 		basic.add(v, i);

@@ -54,10 +54,10 @@ static void test_adventure() {
 	//opponent->setposition({900, 100});
 	//opponent->setdirection(4);
 	//opponent->setanimate(AnimateStand, true);
-	player.chat(*opponent, "manors");
+	//player.chat(*opponent, "manors");
 	//player.trade(*opponent);
 	//game.getplayer().charsheet();
-	//setstage(game.introducing);
+	setstage(game.introducing);
 }
 
 static void test_game() {
@@ -220,8 +220,8 @@ int main(int argc, char* argv[]) {
 	game.clear();
 	game.add("Длинный текст выглядит круто, кроме того его можно форматировать и прокручивать с помощью колеса мышки.");
 	//setstage(test_hittest);
-	setstage(test_adventure);
-	//setstage(game.mainmenu);
+	//setstage(test_adventure);
+	setstage(game.mainmenu);
 	//setstage(test_game);
 	runstage();
 	return 0;

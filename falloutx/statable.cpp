@@ -137,7 +137,10 @@ void statable::apply_derived() {
 }
 
 int	statable::evalute(const formula& e) const {
-	return e.start + get(e.t1) + get(e.t2);
+	auto v = e.start + get(e.t1) + get(e.t2);
+	if(v < e.minimum)
+		v = e.minimum;
+	return v;
 }
 
 void statable::apply_skills() {

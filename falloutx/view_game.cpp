@@ -229,11 +229,6 @@ static void redraw_objects() {
 	}
 }
 
-void set_current_hexagon() {
-	auto pt = s2h(hot.mouse + game.camera);
-	current_hexagon = loc.geth(pt.x, pt.y);
-}
-
 static void redraw_hexagon() {
 	if(current_hexagon == Blocked)
 		return;
@@ -269,7 +264,12 @@ static void control_map() {
 	scrollmap(-1, 0, 277);
 }
 
-static void redraw_map(bool mouse_events) {
+static void set_hexagon_position() {
+	auto pt = s2h(hot.mouse + game.camera);
+	current_hexagon = loc.geth(pt.x, pt.y);
+}
+
+static void redraw_map() {
 	redraw_floor();
 	redraw_hexagon();
 	prepare_objects();
@@ -279,9 +279,6 @@ static void redraw_map(bool mouse_events) {
 }
 
 static void control_hilite() {
-	if(!hot.mouse.in({0, 0, 640, 480 - 99}))
-		return;
-	set_current_hexagon();
 	if(setactionmode()) {
 		if(hilite_object) {
 			addaction(drawable::getnamefn);
@@ -475,11 +472,16 @@ static void redraw_actions(bool combat_mode = false) {
 }
 
 void gamei::play() {
+	static rect play_area = {0, 0, 640, 480 - 99};
 	openform();
 	while(ismodal()) {
-		redraw_map(true);
+		current_hexagon = Blocked;
+		if(hot.mouse.in(play_area))
+			set_hexagon_position();
+		redraw_map();
 		redraw_actions();
-		control_hilite();
+		if(hot.mouse.in(play_area))
+			control_hilite();
 		control_map();
 		domodal();
 		game.update();
@@ -501,7 +503,7 @@ void gamei::combat() {
 		rect rc = {0, 0, 640, 480 - 99};
 		if(ishilite(rc))
 			cursor.set(INTRFACE, 250);
-		redraw_map(false);
+		redraw_map();
 		redraw_actions(true);
 		domodal();
 	}
@@ -516,7 +518,7 @@ void actor::wait() {
 		cursor.set(INTRFACE, 295);
 		if(stop == frame && next_stamp >= game.getaitime())
 			break;
-		redraw_map(false);
+		redraw_map();
 		redraw_actions(true);
 		game.update();
 		if(current_action != animate)
@@ -614,7 +616,8 @@ void areai::editor() {
 	int wall_frame = 1, scenery_frame = 2, tile_frame = 3, mode = 0;
 	while(ismodal()) {
 		rectf({0, 0, 640, 480}, colors::gray);
-		redraw_map(false);
+		set_hexagon_position();
+		redraw_map();
 		control_hilite();
 		control_map();
 		redraw_actions_editor(tile_frame, wall_frame, scenery_frame, mode);

@@ -250,7 +250,7 @@ union variant {
 	};
 	unsigned			u;
 	constexpr variant() : type(NoVariant), value(Awareness) {}
-	constexpr variant(unsigned short v) : u(v) {}
+	constexpr variant(unsigned v) : u(v) {}
 	constexpr variant(action_s v) : type(Action), value(v) {}
 	constexpr variant(command_s v) : type(Command), value(v) {}
 	constexpr variant(damage_s v) : type(Damage), value(v) {}
@@ -271,7 +271,7 @@ union variant {
 	constexpr bool operator==(const variant& e) const { return u == e.u; }
 	constexpr bool operator!=(const variant& e) const { return u != e.u; }
 	constexpr explicit operator bool() const { return type != NoVariant; }
-	constexpr operator unsigned short() const { return u; }
+	constexpr operator unsigned () const { return u; }
 	operator const char*() const { return getname(); }
 	static variant		find(const char* id);
 	int					getavatar() const;
@@ -292,6 +292,7 @@ struct formula {
 	char				start;
 	term				t1, t2;
 	variant				condition;
+	int					minimum;
 	void				add(stringbuilder& sb) const;
 };
 typedef std::initializer_list<formula> formulaa;

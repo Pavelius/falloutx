@@ -1,9 +1,12 @@
 #include "main.h"
 
 BSDATA(itemkindi) = {
+	{{"Armor"}},
+	{{"Container"}},
+	{{"Drug"}},
 	{{"Weapon"}},
 	{{"Ammo"}},
-	{{"Armor"}},
-	{{"Drug"}},
 	{{"Misc"}},
+	{{"Key"}},
 };
+assert_enum(itemkindi, Key)

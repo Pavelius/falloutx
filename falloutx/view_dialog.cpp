@@ -240,6 +240,11 @@ static void trade_creature() {
 	game.getplayer().trade(*opponent);
 }
 
+static void showhistory() {
+	static int origin;
+	showtext(origin, "Ќекоторый текст, который очень длинный");
+}
+
 int answers::chat(const char* format, int backf, creaturei* opponent) const {
 	char temp[260]; stringbuilder sb(temp);
 	openform();
@@ -269,8 +274,8 @@ int answers::chat(const char* format, int backf, creaturei* opponent) const {
 		}
 		sb.clear(); sb.add("$%1i", 31201);
 		text(38 - textw(temp) / 2, 324, temp);
-		if(buttonf(13, 444, 97, 98, 'V', false)) {
-		}
+		if(buttonf(13, 444, 97, 98, 'V', false))
+			execute(showhistory);
 		if(buttonf(593, 331, 96, 95, 'T', false))
 			execute(trade_creature, 0, 0, opponent);
 		domodal();
@@ -286,6 +291,27 @@ static void settext() {
 	stringbuilder sb(pd, pd + hot.param2);
 	sb.add(ps);
 	seteditpos(0xFFFFFFFF);
+}
+
+void draw::showtext(int& origin, const char* text) {
+	while(ismodal()) {
+		background(102);
+		if(origin < 0)
+			origin = 0;
+		if(true) {
+			state push;
+			setclip({95, 95, 95 + 320, 95 + 310});
+			textf(95, 95 - origin, 320, text);
+		}
+		if(buttonf(476, 192, 87, 88, KeyDown, false))
+			execute(setint, origin + texth(), 0, &origin);
+		if(buttonf(476, 154, 89, 90, KeyUp, false))
+			execute(setint, origin - texth(), 0, &origin);
+		if(buttonf(500, 398, 91, 92, KeyEscape, false))
+			execute(buttoncancel);
+		domodal();
+	}
+	closeform();
 }
 
 bool answers::edit(const char* title, char* value, unsigned maximum) const {

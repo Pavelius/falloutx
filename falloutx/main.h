@@ -819,5 +819,6 @@ void					setpallette(int daylight);
 void					setshort();
 void					setstage(fnevent proc);
 void					setnextstage();
+void					showtext(int& origin, const char* text);
 void					window(int& x, int& y, int& sx, int& sy, int frame, int dy = -32);
 }

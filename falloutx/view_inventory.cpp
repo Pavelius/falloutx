@@ -126,7 +126,7 @@ void itema::paint(const rect& rc, int& origin, int mode, point pts) {
 	}
 }
 
-static void render_inventory(creaturei& player) {
+static void redraw_invertory(creaturei& player) {
 	hilite_item = 0;
 	int x, y, sx, sy;
 	static int origin;
@@ -160,7 +160,7 @@ static item* choose_drag_target(creaturei& player, screenshoot& screen, item& so
 	openform();
 	while(ismodal()) {
 		screen.restore();
-		render_inventory(player);
+		redraw_invertory(player);
 		cursor.set(INVEN, source.geti().avatar.inventory, {0, 32});
 		domodal();
 		if(!hot.pressed)
@@ -176,7 +176,7 @@ void creaturei::inventory() {
 	while(ismodal()) {
 		screen.restore();
 		cursor.set(INTRFACE, 286);
-		render_inventory(*this);
+		redraw_invertory(*this);
 		domodal();
 		if(hot.key==MouseLeft) {
 			if(!isactionmode() && hot.pressed && hilite_item) {

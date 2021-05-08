@@ -349,6 +349,7 @@ static void open_inventory() {
 }
 
 static void open_map() {
+	game.automap();
 }
 
 static void quit_game() {
@@ -613,11 +614,9 @@ void areai::editor() {
 	int wall_frame = 1, scenery_frame = 2, tile_frame = 3, mode = 0;
 	while(ismodal()) {
 		rectf({0, 0, 640, 480}, colors::gray);
-		set_current_hexagon();
-		auto cursor_on_map = hot.mouse.in({0, 0, 640, 480 - 99});
-		if(cursor_on_map && current_hexagon != Blocked)
-			cursor.set(None, 0);
 		redraw_map(false);
+		control_hilite();
+		control_map();
 		redraw_actions_editor(tile_frame, wall_frame, scenery_frame, mode);
 		domodal();
 		switch(hot.key) {
@@ -625,7 +624,7 @@ void areai::editor() {
 			apply_frame(mode, 0, 0, 0);
 			break;
 		case MouseLeft:
-			if(cursor_on_map && hot.pressed)
+			if(hot.pressed && current_hexagon!=Blocked)
 				apply_frame(mode, tile_frame, scenery_frame, wall_frame);
 			break;
 		case KeySpace:

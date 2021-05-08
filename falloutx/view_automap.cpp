@@ -1,5 +1,7 @@
+#include "draw.h"
 #include "main.h"
 
-void gamei::automap() {
+using namespace draw;
 
+void gamei::automap() {
 }

@@ -44,9 +44,9 @@ static void test_adventure() {
 		loc.clear();
 		loc.set(loc.geti(0, 0), bsdata<tilei>::elements[2], 128, 128);
 	}
-	//auto opponent = bsdata<creaturei>::add();
-	//opponent->create(Narg);
-	//opponent->add(Knife, 1);
+	auto opponent = bsdata<creaturei>::add();
+	opponent->create(Narg);
+	opponent->add(Knife, 1);
 	//opponent->add(Spear, 1);
 	//opponent->add(Spear, 1);
 	//opponent->add(X10mmPistol, 1);
@@ -54,10 +54,10 @@ static void test_adventure() {
 	//opponent->setposition({900, 100});
 	//opponent->setdirection(4);
 	//opponent->setanimate(AnimateStand, true);
-	//player.chat(*opponent, "manors");
+	player.chat(*opponent, "manors");
 	//player.trade(*opponent);
 	//game.getplayer().charsheet();
-	setstage(game.introducing);
+	//setstage(game.introducing);
 }
 
 static void test_game() {
@@ -222,6 +222,7 @@ int main(int argc, char* argv[]) {
 	//setstage(test_hittest);
 	setstage(test_adventure);
 	//setstage(game.mainmenu);
+	//setstage(test_game);
 	runstage();
 	return 0;
 }

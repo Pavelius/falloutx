@@ -171,3 +171,12 @@ bool item::unload() {
 	setclipcount(0);
 	return true;
 }
+
+void item::drop() {
+	auto owner = getowner();
+	if(!owner)
+		return;
+	itemground::add(owner->getindex(), *this);
+	clear();
+	owner->update();
+}

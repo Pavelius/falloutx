@@ -180,6 +180,7 @@
     <ClCompile Include="grade.cpp" />
     <ClCompile Include="item.cpp" />
     <ClCompile Include="itema.cpp" />
+    <ClCompile Include="itemground.cpp" />
     <ClCompile Include="itemkind.cpp" />
     <ClCompile Include="main_util.cpp" />
     <ClCompile Include="modifier.cpp" />

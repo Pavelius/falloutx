@@ -36,7 +36,7 @@ static void test_adventure() {
 	player.add(X12GaShotgunShells, 10);
 	player.add(AdvancedPowerArmor, 1);
 	player.add(AdvPowerArmorMKII, 1);
-	player.setposition(h2s({23, 25}));
+	player.setposition(loc.geth(23, 25));
 	player.setdirection(2);
 	player.setanimate(AnimateStand, true);
 	game.setcamera({1000, 100});
@@ -218,8 +218,6 @@ int main(int argc, char* argv[]) {
 	main_util();
 	initialize();
 	game.clear();
-	game.add("Тестирование вывода информации в консоль для всех жителей городов %1.", "NRK");
-	game.add("Оставайтесь хладнокровными и берегитесь врагов!");
 	game.add("Длинный текст выглядит круто, кроме того его можно форматировать и прокручивать с помощью колеса мышки.");
 	//setstage(test_hittest);
 	setstage(test_adventure);

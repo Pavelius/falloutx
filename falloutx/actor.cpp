@@ -50,6 +50,16 @@ void actor::setdirection(unsigned char v) {
 	set(rid, animate * 6 + direction);
 }
 
+void actor::moveto(indext v) {
+	setdirection(getdirection(*this, draw::h2s(v)));
+	setposition(v);
+}
+
+void actor::setposition(indext v) {
+	index_position = v;
+	drawable::setposition(draw::h2s({(short)loc.gethx(v), (short)loc.gethy(v)}));
+}
+
 void actor::setanimate(animate_s v, bool force) {
 	if(!force && animate == v)
 		return;
@@ -72,6 +82,36 @@ bool wearable::additem(item& ei) {
 		return true;
 	}
 	return false;
+}
+
+unsigned char actor::getdirection(point from, point to) {
+	static const unsigned char orientations[25] = {
+		5, 5, 0, 0, 0,
+		5, 5, 0, 0, 0,
+		4, 4, 2, 1, 1,
+		3, 3, 2, 2, 2,
+		3, 3, 3, 2, 2
+	};
+	int dx = to.x - from.x;
+	int dy = to.y - from.y;
+	int div = imax(iabs(dx), iabs(dy));
+	if(!div)
+		return 2; //default
+	if(div > 3)
+		div /= 2;
+	int ax = dx / div;
+	int ay = dy / div;
+	return orientations[(ay + 2) * 5 + ax + 2];
+}
+
+int actor::getlongest(const point from, const point to) {
+	return imax(iabs(from.x - to.x), iabs(from.y - to.y));
+}
+
+int actor::getrange(const point p1, const point p2) {
+	int dx = p1.x - p2.x;
+	int dy = p1.y - p2.y;
+	return isqrt(dx * dx + dy * dy);
 }
 
 bool wearable::additems(wearable& source) {

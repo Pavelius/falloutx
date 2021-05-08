@@ -9,6 +9,7 @@ const int			sty = tile_height / 3; // 12 - Высота юнита тайла. Каждый тайл имеет
 
 static drawable*	hilite_object;
 static drawablea	objects;
+static adat<drawable, 1024> drawables;
 static indext		current_hexagon;
 static indext		current_tile;
 static bool			show_roof = true;
@@ -39,6 +40,10 @@ point draw::h2s(point v) {
 	//	(short)(stx * (y + x + x / 2) - stx / 2),
 	//	(short)(sty * (y - x + x / 2) - sty / 2)
 	//};
+}
+
+point draw::h2s(indext v) {
+	return h2s({(short)loc.gethx(v), (short)loc.gethy(v)});
 }
 
 // Определение координаты хексагона
@@ -172,15 +177,40 @@ static void scrollmap(int x, int y, int cicle) {
 	}
 }
 
+static void add_drawable(const rect& rc, indext position, res_s rid, int cicle) {
+	if(position == Blocked)
+		return;
+	auto pt = h2s({(short)loc.gethx(position), (short)loc.gethy(position)});
+	if(!pt.in(rc))
+		return;
+	auto p = drawables.add();
+	p->x = pt.x;
+	p->y = pt.y;
+	p->set(rid, cicle);
+	objects.add(p);
+}
+
 static void prepare_objects() {
 	auto size = 160;
 	rect rc = {-size, -size, 640 + size, 480 + size};
 	rc.move(game.camera.x, game.camera.y);
+	drawables.clear();
 	objects.clear();
-	objects.select();
+	for(auto& e : bsdata<creaturei>()) {
+		if(e && e.in(rc))
+			objects.add(&e);
+	}
+	for(auto& e : game.players) {
+		if(e && e.in(rc))
+			objects.add(&e);
+	}
 	for(auto& e : bsdata<mapobject>()) {
 		if(e && e.in(rc))
 			objects.add(&e);
+	}
+	for(auto& e : bsdata<itemground>()) {
+		if(e)
+			add_drawable(rc, e.position, ITEMS, e.geti().avatar.ground);
 	}
 	objects.sortz();
 }
@@ -453,6 +483,10 @@ void gamei::play() {
 		domodal();
 		game.update();
 		switch(hot.key) {
+		case MouseLeft:
+			if(!isactionmode() && current_hexagon != Blocked && hot.pressed)
+				game.getplayer().moveto(current_hexagon);
+			break;
 		case 'G': show_center = !show_center; break;
 		}
 	}

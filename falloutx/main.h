@@ -326,7 +326,7 @@ struct drawable : public point {
 	bool				update();
 };
 struct drawablea : adat<drawable*, 512> {
-	void				select();
+	void				addcreatures();
 	void				sortz();
 };
 struct action {
@@ -414,6 +414,7 @@ public:
 	void				addtext(stringbuilder& sb) const;
 	void				clear();
 	void				create();
+	void				drop();
 	item_s				getclipammo() const;
 	int					getclipcount() const;
 	int					getcount() const;
@@ -423,6 +424,7 @@ public:
 	const char*			getname() const { return geti().txt.name; }
 	static const char*	getobjectname(const void* object, stringbuilder& sb);
 	creaturei*			getowner() const;
+	bool				is(itemkind_s v) const;
 	bool				isarmor() const { return geti().isarmor(); }
 	bool				isranged() const { return geti().isranged(); }
 	bool				isweapon() const { return geti().isweapon(); }
@@ -430,6 +432,10 @@ public:
 	bool				setclipcount(int v);
 	bool				setcount(int v);
 	bool				unload();
+};
+struct itemground : item {
+	static void			add(indext i, const item& it);
+	indext				position;
 };
 struct pregeni {
 	texti				txt;
@@ -476,6 +482,7 @@ struct statable {
 	void				update(const item& it);
 };
 class actor : public drawable, public nameable {
+	indext				index_position;
 	animate_s			animate = AnimateDeadForward;
 	unsigned char		direction = 0;
 	item				armor, hands[2];
@@ -487,14 +494,20 @@ public:
 	static animate_s	getbaseanimate(animate_s v, int* w = 0);
 	static int			getcicle(draw::res_s& rid, animate_s v, gender_s gender, item_s armor, item_s weapon, int dir);
 	unsigned char		getdirection() const { return direction; }
+	static unsigned char getdirection(point from, point to);
+	indext				getindex() const { return index_position; }
+	static int			getlongest(const point from, const point to);
+	static int			getrange(const point p1, const point p2);
 	const item&			getweapon(int i) const { return hands[i]; }
 	item&				getweapon(int i) { return hands[i]; }
 	const item&			getweapon() const { return getweapon(0); }
 	static bool			isweaponanimate(animate_s v);
+	void				moveto(indext v);
 	static void			preview(int x, int y, gender_s gender, item_s armor, item_s weapon, unsigned tick);
 	void				reanimate();
 	void				setanimate(animate_s v, bool force = false);
 	void				setdirection(unsigned char v);
+	void				setposition(indext v);
 	void				wait();
 };
 class itema : public adat<item*, 512> {
@@ -771,6 +784,7 @@ sprite*					gres(res_s id);
 const char*				getname(res_s id);
 unsigned				getuitime();
 point					h2s(point v);
+point					h2s(indext v);
 void					image(int x, int y, res_s id, int cicle, int flags = 0, unsigned char alpha = 0xFF);
 bool					isactionmode();
 bool					isdefaultinput();

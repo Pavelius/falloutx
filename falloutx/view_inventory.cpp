@@ -13,6 +13,8 @@ static void look_item() {
 }
 
 static void drop_item() {
+	auto p = (item*)hot.object;
+	p->drop();
 }
 
 static void use_item() {

@@ -287,6 +287,9 @@
     <ClCompile Include="pro_wall_util.cpp">
       <Filter>Утилиты</Filter>
     </ClCompile>
+    <ClCompile Include="itemground.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\localization\ru\skill.txt">

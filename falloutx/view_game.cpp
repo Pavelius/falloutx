@@ -330,11 +330,15 @@ static void endcombat() {
 
 static void change_item() {
 	auto& player = game.getplayer();
-	player.setanimate(AnimateWeaponTakeOff);
-	player.wait();
+	if(player.getweapon()) {
+		player.setanimate(AnimateWeaponTakeOff);
+		player.wait();
+	}
 	player.changeitems();
-	player.setanimate(AnimateWeaponTakeOn);
-	player.wait();
+	if(player.getweapon()) {
+		player.setanimate(AnimateWeaponTakeOn);
+		player.wait();
+	}
 }
 
 static void change_item_action() {
@@ -491,6 +495,15 @@ void gamei::play() {
 				game.getplayer().moveto(current_hexagon);
 			break;
 		case 'G': show_center = !show_center; break;
+		case 'U':
+			game.getplayer().doanimate(AnimateUse);
+			break;
+		case 'D':
+			game.getplayer().doanimate(AnimateDodge);
+			break;
+		case 'K':
+			game.getplayer().doanimate(AnimateKnockOutForward);
+			break;
 		}
 	}
 	closeform();
@@ -518,8 +531,9 @@ void actor::wait() {
 		cursor.set(INTRFACE, 295);
 		if(stop == frame && next_stamp >= game.getaitime())
 			break;
+		current_hexagon = Blocked;
 		redraw_map();
-		redraw_actions(true);
+		redraw_actions();
 		game.update();
 		if(current_action != animate)
 			break;

@@ -220,8 +220,8 @@ int main(int argc, char* argv[]) {
 	game.clear();
 	game.add("Длинный текст выглядит круто, кроме того его можно форматировать и прокручивать с помощью колеса мышки.");
 	//setstage(test_hittest);
-	//setstage(test_adventure);
-	setstage(game.mainmenu);
+	setstage(test_adventure);
+	//setstage(game.mainmenu);
 	//setstage(test_game);
 	runstage();
 	return 0;

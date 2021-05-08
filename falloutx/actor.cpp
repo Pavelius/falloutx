@@ -67,6 +67,12 @@ void actor::setanimate(animate_s v, bool force) {
 	reanimate();
 }
 
+void actor::doanimate(animate_s v, bool stop_and_wait) {
+	setanimate(v, true);
+	if(stop_and_wait)
+		wait();
+}
+
 bool wearable::additem(item& ei) {
 	for(auto& e : gears) {
 		if(!e)

@@ -488,6 +488,7 @@ class actor : public drawable, public nameable {
 	unsigned char		direction = 0;
 	item				armor, hands[2];
 public:
+	void				doanimate(animate_s v, bool stop_and_wait = true);
 	animate_s			getanimate() const { return animate; }
 	static animate_s	getanimate(animate_s v, int w);
 	const item&			getarmor() const { return armor; }

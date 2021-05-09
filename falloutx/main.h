@@ -68,9 +68,6 @@ enum perk_s : unsigned char {
 	WeaponEnchencedKnockout, MegaUnlucky,
 	FirstPerk = Awareness, LastPerk = MegaUnlucky,
 };
-enum kind_s : unsigned char {
-	VaultDweller, Mutant, Ghoul,
-};
 enum trait_s : unsigned char {
 	FastMetabolism, Bruiser, SmallFrame, OneHanded, Finesse, Kamikaze, HeavyHanded, FastShoot,
 	BloodyMess, Jinxed, GoodNatured, ChemReliant, ChemResistant, SexAppeal, Skilled, Gifted,
@@ -199,6 +196,7 @@ enum command_s {
 };
 enum pregen_s : unsigned char {
 	NoPregen, Narg, Mingun, Chitsa,
+	SuperMutant,
 };
 namespace draw {
 enum res_s : unsigned short {
@@ -297,17 +295,17 @@ struct formula {
 };
 typedef std::initializer_list<formula> formulaa;
 class nameable {
-	kind_s				kind;
+	pregen_s			kind;
 	gender_s			gender;
 	char				name[16];
 public:
 	void				act(const char* id, ...) const;
 	void				actv(stringbuilder& sb, const char* format, const char* format_param) const;
 	gender_s			getgender() const { return gender; }
-	kind_s				getkind() const { return kind; }
+	pregen_s			getkind() const { return kind; }
 	const char*			getname() const { return name; }
 	void				setgender(gender_s v) { gender = v; }
-	void				setkind(kind_s v) { kind = v; }
+	void				setkind(pregen_s v) { kind = v; }
 	void				setname(const char* v);
 };
 struct drawable : public point {
@@ -440,7 +438,6 @@ struct itemground : item {
 };
 struct pregeni {
 	texti				txt;
-	kind_s				kind;
 	unsigned char		level;
 	short				age;
 	gender_s			gender;
@@ -448,6 +445,7 @@ struct pregeni {
 	traita				trait;
 	skilla				tag;
 	geara				gears;
+	draw::res_s			rid;
 };
 struct kindi {
 	draw::res_s			avatar[2]; // Gender depend
@@ -499,7 +497,7 @@ public:
 	item&				getarmor() { return armor; }
 	animate_s			getbaseanimate() const;
 	static animate_s	getbaseanimate(animate_s v, int* w = 0);
-	static int			getcicle(draw::res_s& rid, animate_s v, gender_s gender, item_s armor, item_s weapon, int dir);
+	static int			getcicle(draw::res_s& rid, animate_s v, pregen_s pregen, gender_s gender, item_s armor, item_s weapon, int dir);
 	unsigned char		getdirection() const { return direction; }
 	static unsigned char getdirection(point from, point to);
 	indext				getindex() const { return index_position; }

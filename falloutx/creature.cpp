@@ -38,7 +38,7 @@ void creaturei::updateanm() {
 	switch(getbaseanimate()) {
 	case AnimateStand:
 	case AnimateWeaponStand:
-		next_stamp += xrand(3, 6) * 1000;
+		next_stamp += xrand(3, 8) * 1000;
 		break;
 	}
 }
@@ -87,6 +87,8 @@ void creaturei::create(pregen_s v) {
 	update();
 	setname(ei.txt.name);
 	setgender(ei.gender);
+	if(ei.rid)
+		setkind(v);
 	finish();
 }
 

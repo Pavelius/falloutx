@@ -1,3 +1,2 @@
-﻿In localization file action.txt
- Not found translation UseItem
- Not found translation UseSkill
+﻿In localization file pregen.txt
+ Not found translation SuperMutant

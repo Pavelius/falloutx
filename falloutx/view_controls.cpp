@@ -571,7 +571,7 @@ void draw::marker(int x, int y) {
 
 void actor::preview(int x, int y, gender_s gender, item_s armor, item_s weapon, unsigned tick) {
 	res_s rid;
-	int c = getcicle(rid, AnimateStand, gender, armor, weapon, tick % 6);
+	int c = getcicle(rid, AnimateStand, NoPregen, gender, armor, weapon, tick % 6);
 	auto ps = gres(rid);
 	if(!ps)
 		return;

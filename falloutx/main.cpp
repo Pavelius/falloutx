@@ -45,15 +45,15 @@ static void test_adventure() {
 		loc.set(loc.geti(0, 0), bsdata<tilei>::elements[2], 128, 128);
 	}
 	auto opponent = bsdata<creaturei>::add();
-	opponent->create(Narg);
+	opponent->create(SuperMutant);
 	opponent->add(Knife, 1);
-	//opponent->add(Spear, 1);
-	//opponent->add(Spear, 1);
-	//opponent->add(X10mmPistol, 1);
-	//opponent->add(X10mmSMG, 1);
-	//opponent->setposition({900, 100});
-	//opponent->setdirection(4);
-	//opponent->setanimate(AnimateStand, true);
+	opponent->add(Spear, 1);
+	opponent->add(Spear, 1);
+	opponent->add(X10mmPistol, 1);
+	opponent->add(X10mmSMG, 1);
+	opponent->setposition(loc.geth(25, 19));
+	opponent->setdirection(2);
+	opponent->setanimate(AnimateStand, true);
 	//player.chat(*opponent, "manors");
 	//player.trade(*opponent);
 	//game.getplayer().charsheet();

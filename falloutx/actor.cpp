@@ -23,8 +23,11 @@ animate_s actor::getanimate(animate_s v, int w) {
 	return v;
 }
 
-int	actor::getcicle(draw::res_s& rid, animate_s v, gender_s gender, item_s armor, item_s weapon, int dir) {
-	rid = (gender == Male) ? bsdata<itemi>::elements[armor].armor.male : bsdata<itemi>::elements[armor].armor.female;
+int	actor::getcicle(draw::res_s& rid, animate_s v, pregen_s pregen, gender_s gender, item_s armor, item_s weapon, int dir) {
+	if(pregen)
+		rid = bsdata<pregeni>::elements[pregen].rid;
+	else
+		rid = (gender == Male) ? bsdata<itemi>::elements[armor].armor.male : bsdata<itemi>::elements[armor].armor.female;
 	if(!rid)
 		rid = (gender == Male) ? draw::HMJMPS : draw::HFJMPS;
 	auto wp = bsdata<itemi>::elements[weapon].avatar.animation;
@@ -44,7 +47,7 @@ int	actor::getcicle(draw::res_s& rid, animate_s v, gender_s gender, item_s armor
 
 void actor::reanimate() {
 	draw::res_s rid;
-	auto cicle = getcicle(rid, animate, getgender(), getarmor(), getweapon(), direction);
+	auto cicle = getcicle(rid, animate, getkind(), getgender(), getarmor(), getweapon(), direction);
 	set(rid, cicle);
 	next_stamp = game.getaitime();
 }

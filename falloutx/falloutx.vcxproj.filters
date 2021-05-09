@@ -290,6 +290,9 @@
     <ClCompile Include="itemground.cpp">
       <Filter>Логика</Filter>
     </ClCompile>
+    <ClCompile Include="kind.cpp">
+      <Filter>Логика</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\localization\ru\skill.txt">

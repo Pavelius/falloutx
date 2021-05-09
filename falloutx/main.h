@@ -440,6 +440,7 @@ struct itemground : item {
 };
 struct pregeni {
 	texti				txt;
+	kind_s				kind;
 	unsigned char		level;
 	short				age;
 	gender_s			gender;
@@ -447,6 +448,9 @@ struct pregeni {
 	traita				trait;
 	skilla				tag;
 	geara				gears;
+};
+struct kindi {
+	draw::res_s			avatar[2]; // Gender depend
 };
 struct statable {
 	short				stats[LastStat + 1];
@@ -493,6 +497,7 @@ public:
 	static animate_s	getanimate(animate_s v, int w);
 	const item&			getarmor() const { return armor; }
 	item&				getarmor() { return armor; }
+	animate_s			getbaseanimate() const;
 	static animate_s	getbaseanimate(animate_s v, int* w = 0);
 	static int			getcicle(draw::res_s& rid, animate_s v, gender_s gender, item_s armor, item_s weapon, int dir);
 	unsigned char		getdirection() const { return direction; }
@@ -762,6 +767,7 @@ struct anminfo {
 	point				delta[6];
 	static const anminfo* get(const sprite* p);
 	static const anminfo* get(res_s rid);
+	int					getfps() const { return fps ? fps : 10; }
 };
 void					addaction(fntext getname);
 void					addaction(action_s a, fnevent proc, void* object, int param);

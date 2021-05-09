@@ -9,6 +9,10 @@ animate_s actor::getbaseanimate(animate_s v, int* w) {
 	return v;
 }
 
+animate_s actor::getbaseanimate() const {
+	return getbaseanimate(getanimate(), 0);
+}
+
 bool actor::isweaponanimate(animate_s v) {
 	return v >= FirstWeaponAnimate;
 }

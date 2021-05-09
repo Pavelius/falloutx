@@ -182,6 +182,7 @@
     <ClCompile Include="itema.cpp" />
     <ClCompile Include="itemground.cpp" />
     <ClCompile Include="itemkind.cpp" />
+    <ClCompile Include="kind.cpp" />
     <ClCompile Include="main_util.cpp" />
     <ClCompile Include="modifier.cpp" />
     <ClCompile Include="pro_criters_util.cpp" />

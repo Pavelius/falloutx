@@ -15,11 +15,11 @@ creaturei* creaturei::ptr(const void* v) {
 void creaturei::updateanm() {
 	if(next_stamp >= game.getaitime())
 		return;
-	next_stamp += 2500 / 10;
-	if(!drawable::update())
-		return;
 	auto pai = draw::anminfo::get(rid);
 	if(!pai)
+		return;
+	next_stamp += 1400 / pai[getanimate()].getfps();
+	if(!drawable::update())
 		return;
 	if(pai[getanimate()].frame_count == 1)
 		return;
@@ -35,8 +35,9 @@ void creaturei::updateanm() {
 		setanimate(getanimate(ai.next_dead, w));
 	else
 		setanimate(getanimate(ai.next, w));
-	switch(getanimate()) {
+	switch(getbaseanimate()) {
 	case AnimateStand:
+	case AnimateWeaponStand:
 		next_stamp += xrand(3, 6) * 1000;
 		break;
 	}

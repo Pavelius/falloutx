@@ -19,8 +19,14 @@ void creaturei::updateanm() {
 	if(!pai)
 		return;
 	next_stamp += 1400 / pai[getanimate()].getfps();
-	if(!drawable::update())
+	if(!drawable::update()) {
+		if(ismovement()) {
+			point* ppt = (point*)(pai + LastAnimation) + frame;
+			x += ppt->x;
+			y += ppt->y;
+		}
 		return;
+	}
 	if(pai[getanimate()].frame_count == 1)
 		return;
 	auto a = getanimate();
@@ -29,16 +35,17 @@ void creaturei::updateanm() {
 		a = getbaseanimate(a, &w);
 	auto hp = get(HPCur);
 	auto& ai = bsdata<animationi>::elements[a];
-	if(!ai.next)
-		setanimate(AnimateStand);
-	else if(ai.next_dead && hp <= 0)
+	if(!ai.next) {
+		if(!ismovement())
+			setanimate(AnimateStand);
+	} else if(ai.next_dead && hp <= 0)
 		setanimate(getanimate(ai.next_dead, w));
 	else
 		setanimate(getanimate(ai.next, w));
 	switch(getbaseanimate()) {
 	case AnimateStand:
 	case AnimateWeaponStand:
-		next_stamp += xrand(3, 8) * 1000;
+		next_stamp += xrand(3*1000, 10*1000);
 		break;
 	}
 }

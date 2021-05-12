@@ -75,6 +75,55 @@ void test_tile();
 void test_walls();
 void test_animate();
 
+void test_movement() {
+	char temp[260]; stringbuilder sb(temp);
+	openform();
+	game.camera = {-320, -240};
+	auto& object = game.getplayer();
+	object.create(Chitsa);
+	object.setposition(0);
+	object.setdirection(2);
+	object.setanimate(AnimateStand, true);
+	while(ismodal()) {
+		rectf({0, 0, 640, 480}, colors::gray);
+		for(auto y = 0; y < 3; y++) {
+			for(auto x = 0; x < 3; x++) {
+				auto pt = t2s({(short)x, (short)y}) - game.camera;
+				image(pt.x, pt.y, TILES, 132, 0);
+			}
+		}
+		point p0;
+		auto x = object.x - game.camera.x, y = object.y - game.camera.y;
+		auto ps = gres(object.rid);
+		auto pa = anminfo::get(object.rid);
+		auto& fr = ps->get(object.frame);
+		auto& f0 = ps->get(ps->ganim(AnimateStand * 6 + object.getdirection(), 0));
+		p0.x = x + f0.ox - fr.ox;
+		p0.y = y + f0.oy - fr.oy;
+		line(x, y, p0.x, p0.y, colors::red);
+		object.paint(x, y, 0);
+		sb.clear();
+		point pt;
+		pt = s2t(hot.mouse + game.camera);
+		if(pt.x >= 0 && pt.y >= 0)
+			sb.addn("Tile %1i, %2i", pt.x, pt.y);
+		pt = s2h(hot.mouse + game.camera);
+		if(pt.x >= 0 && pt.y >= 0)
+			sb.addn("Hex %1i, %2i", pt.x, pt.y);
+		text(4, 4, temp);
+		domodal();
+		switch(hot.key) {
+		case KeyEscape: breakmodal(0); break;
+		case 'W': object.setanimate(AnimateWalk); break;
+		case InputTimer:
+			game.passai(50);
+			object.updateanm();
+			break;
+		}
+	}
+	closeform();
+}
+
 void gamei::mainmenu() {
 	openform();
 	while(ismodal()) {
@@ -182,10 +231,10 @@ static void test_hittest() {
 					pz.x = x; pz.y = y;
 					auto pt = s2h1(pz + game.camera);
 					if(pt.x == 4 && pt.y == 0)
-					//	fore = colors::red;
-					//else
-					//	fore = colors::green;
-					pixel(x, y);
+						//	fore = colors::red;
+						//else
+						//	fore = colors::green;
+						pixel(x, y);
 				}
 				fore = push_fore;
 			}
@@ -219,8 +268,8 @@ int main(int argc, char* argv[]) {
 	initialize();
 	game.clear();
 	game.add("Длинный текст выглядит круто, кроме того его можно форматировать и прокручивать с помощью колеса мышки.");
-	//setstage(test_hittest);
-	setstage(test_adventure);
+	setstage(test_movement);
+	//setstage(test_adventure);
 	//setstage(game.mainmenu);
 	//setstage(test_game);
 	runstage();

@@ -13,6 +13,12 @@ const anminfo* anminfo::get(const sprite* ps) {
 	return (anminfo*)ps->ptr(ps->cicles_offset + ps->cicles * sizeof(sprite::cicle));
 }
 
+const point anminfo::getoffset(const sprite* ps, int frame) {
+	if(!ps)
+		return {};
+	return ((point*)ps->ptr(ps->cicles_offset + ps->cicles * sizeof(sprite::cicle) + sizeof(anminfo) * LastAnimation))[frame];
+}
+
 bool drawable::update() {
 	if(frame < frame_stop) {
 		frame++;

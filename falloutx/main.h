@@ -312,6 +312,7 @@ struct drawable : public point {
 	draw::res_s			rid;
 	unsigned short		frame, frame_start, frame_stop;
 	unsigned			next_stamp;
+	explicit operator bool() const { return rid != 0; }
 	void				add(point v) { x += v.x; y += v.y; }
 	bool				getrect(rect& result, point camera);
 	static draw::res_s	getrid(item_s armor, gender_s gender);
@@ -507,6 +508,7 @@ public:
 	item&				getweapon(int i) { return hands[i]; }
 	const item&			getweapon() const { return getweapon(0); }
 	static bool			isweaponanimate(animate_s v);
+	bool				ismovement() const;
 	void				moveto(indext v);
 	static void			preview(int x, int y, gender_s gender, item_s armor, item_s weapon, unsigned tick);
 	void				reanimate();
@@ -672,6 +674,7 @@ public:
 	static void			localization(const char* id, bool write_mode);
 	static void			newgame();
 	static void			mainmenu();
+	static void			passai(unsigned ticks);
 	void				passtime();
 	void				passtime(unsigned minutes);
 	static void			pipboy();
@@ -765,6 +768,7 @@ struct anminfo {
 	point				delta[6];
 	static const anminfo* get(const sprite* p);
 	static const anminfo* get(res_s rid);
+	static const point	getoffset(const sprite* p, int frame);
 	int					getfps() const { return fps ? fps : 10; }
 };
 void					addaction(fntext getname);

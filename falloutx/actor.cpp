@@ -1,5 +1,16 @@
 #include "main.h"
 
+bool actor::ismovement() const {
+	switch(getbaseanimate()) {
+	case AnimateWalk:
+	case AnimateWeaponWalk:
+	case AnimateRun:
+		return true;
+	default:
+		return false;
+	}
+}
+
 animate_s actor::getbaseanimate(animate_s v, int* w) {
 	if(isweaponanimate(v)) {
 		if(w)
@@ -72,6 +83,16 @@ void actor::setanimate(animate_s v, bool force) {
 		return;
 	animate = v;
 	reanimate();
+	if(ismovement()) {
+		auto pai = draw::anminfo::get(rid);
+		point* ppt = (point*)(pai + LastAnimation) + frame;
+		x += ppt->x;
+		y += ppt->y;
+		if(frame == frame_start) {
+			x += pai->delta[animate].x;
+			y += pai->delta[animate].y;
+		}
+	}
 }
 
 void actor::doanimate(animate_s v, bool stop_and_wait) {

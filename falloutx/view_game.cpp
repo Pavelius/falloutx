@@ -496,7 +496,7 @@ void gamei::play() {
 			break;
 		case 'G': show_center = !show_center; break;
 		case 'U':
-			game.getplayer().doanimate(AnimateUse);
+			game.getplayer().doanimate(AnimateWalk);
 			break;
 		case 'D':
 			game.getplayer().doanimate(AnimateDodge);

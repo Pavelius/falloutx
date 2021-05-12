@@ -54,12 +54,16 @@ unsigned gamei::getaitime() {
 	return game_tick;
 }
 
+void gamei::passai(unsigned ticks) {
+	game_tick += ticks;
+}
+
 void gamei::update() {
 	static unsigned last_tick;
 	auto m = draw::getuitime();
 	if(!last_tick || (m - last_tick) >= 2000)
 		last_tick = m;
-	game_tick += m - last_tick;
+	passai(m - last_tick);
 	last_tick = m;
 	for(auto& e : bsdata<creaturei>()) {
 		if(e)

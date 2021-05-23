@@ -84,14 +84,9 @@ void actor::setanimate(animate_s v, bool force) {
 	animate = v;
 	reanimate();
 	if(ismovement()) {
-		auto pai = draw::anminfo::get(rid);
-		point* ppt = (point*)(pai + LastAnimation) + frame;
-		x += ppt->x;
-		y += ppt->y;
-		if(frame == frame_start) {
-			x += pai->delta[animate].x;
-			y += pai->delta[animate].y;
-		}
+		auto pt = draw::anminfo::getoffset(gres(rid), frame);
+		x += pt.x;
+		y += pt.y;
 	}
 }
 

@@ -19,14 +19,14 @@ void creaturei::updateanm() {
 	if(!pai)
 		return;
 	next_stamp += 1400 / pai[getanimate()].getfps();
-	if(!drawable::update()) {
-		if(ismovement()) {
-			point* ppt = (point*)(pai + LastAnimation) + frame;
-			x += ppt->x;
-			y += ppt->y;
-		}
-		return;
+	auto update_result = drawable::update();
+	if(ismovement()) {
+		auto pt = draw::anminfo::getoffset(gres(rid), frame);
+		x += pt.x;
+		y += pt.y;
 	}
+	if(!update_result)
+		return;
 	if(pai[getanimate()].frame_count == 1)
 		return;
 	auto a = getanimate();

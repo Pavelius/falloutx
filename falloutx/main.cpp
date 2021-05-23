@@ -80,7 +80,7 @@ void test_movement() {
 	openform();
 	game.camera = {-320, -240};
 	auto& object = game.getplayer();
-	object.create(Chitsa);
+	object.create(SuperMutant);
 	object.setposition(0);
 	object.setdirection(2);
 	object.setanimate(AnimateStand, true);
@@ -94,13 +94,13 @@ void test_movement() {
 		}
 		point p0;
 		auto x = object.x - game.camera.x, y = object.y - game.camera.y;
-		auto ps = gres(object.rid);
-		auto pa = anminfo::get(object.rid);
-		auto& fr = ps->get(object.frame);
-		auto& f0 = ps->get(ps->ganim(AnimateStand * 6 + object.getdirection(), 0));
-		p0.x = x + f0.ox - fr.ox;
-		p0.y = y + f0.oy - fr.oy;
-		line(x, y, p0.x, p0.y, colors::red);
+		//auto ps = gres(object.rid);
+		//auto pa = anminfo::get(object.rid);
+		//auto& fr = ps->get(object.frame);
+		//auto& f0 = ps->get(ps->ganim(AnimateStand * 6 + object.getdirection(), 0));
+		//p0.x = x + f0.ox - fr.ox;
+		//p0.y = y + f0.oy - fr.oy;
+		//line(x, y, p0.x, p0.y, colors::red);
 		object.paint(x, y, 0);
 		sb.clear();
 		point pt;
@@ -114,12 +114,20 @@ void test_movement() {
 		domodal();
 		switch(hot.key) {
 		case KeyEscape: breakmodal(0); break;
-		case 'W': object.setanimate(AnimateWalk); break;
-		case InputTimer:
-			game.passai(50);
-			object.updateanm();
+		case 'W':
+			if(object.getanimate() == AnimateWalk)
+				object.setanimate(AnimateStand);
+			else
+				object.setanimate(AnimateWalk);
+			break;
+		case KeyLeft:
+			object.setdirection(object.getdirection() >= 5 ? 0 : object.getdirection() + 1);
+			break;
+		case KeyRight:
+			object.setdirection(object.getdirection() ? object.getdirection() - 1 : 5);
 			break;
 		}
+		game.update();
 	}
 	closeform();
 }

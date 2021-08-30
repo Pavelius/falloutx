@@ -80,7 +80,7 @@ void test_movement() {
 	openform();
 	game.camera = {-320, -240};
 	auto& object = game.getplayer();
-	object.create(SuperMutant);
+	object.create(Chitsa);
 	object.setposition(0);
 	object.setdirection(2);
 	object.setanimate(AnimateStand, true);
@@ -92,7 +92,6 @@ void test_movement() {
 				image(pt.x, pt.y, TILES, 132, 0);
 			}
 		}
-		point p0;
 		auto x = object.x - game.camera.x, y = object.y - game.camera.y;
 		//auto ps = gres(object.rid);
 		//auto pa = anminfo::get(object.rid);

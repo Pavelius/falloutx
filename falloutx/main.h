@@ -196,7 +196,7 @@ enum command_s {
 };
 enum pregen_s : unsigned char {
 	NoPregen, Narg, Mingun, Chitsa,
-	SuperMutant,
+	SuperMutant, MadDog
 };
 namespace draw {
 enum res_s : unsigned short {

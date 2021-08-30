@@ -8,5 +8,6 @@ BSDATA(pregeni) = {
 	{{"Mingun"}, 1, 32, Male, {5, 8, 4, 4, 5, 9, 5}, {SmallFrame, Skilled}, {Sneak, Lockpick, Steal}},
 	{{"Chitsa"}, 1, 19, Female, {4, 5, 4, 10, 7, 6, 4}, {OneHanded, SexAppeal}, {Speech, Barter, FirstAid}},
 	{{"SuperMutant"}, 3, 70, Male, {9, 5, 4, 1, 1, 6, 2}, {}, {BigGuns, Unarmed}, {}, MAMTNT},
+	{{"MadDog"}, 3, 10, Male, {3, 3, 3, 1, 1, 3, 3}, {}, {Unarmed, Throwing}, {}, MADDOG},
 };
-assert_enum(pregeni, SuperMutant)
+assert_enum(pregeni, MadDog)

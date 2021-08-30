@@ -1,2 +1,2 @@
 ﻿In localization file pregen.txt
- Not found translation SuperMutant
+ Not found translation MadDog
